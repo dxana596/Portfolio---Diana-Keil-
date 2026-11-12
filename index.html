@@ -451,7 +451,13 @@ const CONFIG = {
   // Platzhalterbilder – ersetze durch eigene URLs (z. B. "img/foto1.jpg")
   imageUrl: (id, w = 1600, h = 900) => `https://picsum.photos/seed/${id}/${w}/${h}`,
   // Startseite: Fotos von dir (wechseln sich sanft ab; leere Liste = Platzhalter) und kleiner Text unter dem Namen
-  portraits: ["img/about/diana.jpg", "img/about/diana-2.jpg"],
+  // Fotos von dir auf der Startseite – wechseln sich alle 5 Sekunden ab. pos = welcher Bildteil sichtbar bleibt (bei Quer-/Quadratformat)
+  portraits: [
+    "img/about/diana.jpg", "img/about/diana-2.jpg", "img/about/diana-3.jpg", "img/about/diana-4.jpg",
+    "img/about/diana-5.jpg", "img/about/diana-6.jpg", { src: "img/about/diana-7.jpg", pos: "50% 30%" },
+    "img/about/diana-8.jpg", "img/about/diana-9.jpg", { src: "img/about/diana-10.jpg", pos: "60% 50%" },
+    "img/about/diana-11.jpg",
+  ],
   introText: "Hi, ich bin Diana – ich halte Momente fest, die bleiben. Ich fotografiere und filme Hochzeiten, Events und Shootings. Scroll weiter und schau dir meine Arbeiten an.",
   // Kunden-Logos (Dateien in img/kunden). "foto" = selbst fotografiert, "edit" = bearbeitet
   clients: {
@@ -487,7 +493,7 @@ document.getElementById("introText").textContent = CONFIG.introText;
 // Fotos von dir: liegen übereinander und wechseln sich alle 5 Sekunden sanft ab
 if (CONFIG.portraits.length) {
   const photoEl = document.getElementById("introPhoto");
-  photoEl.innerHTML = `<div class="intro__ring"><svg class="ring" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1"/><g fill="currentColor"><circle cx="100" cy="20" r="2.6"/><circle cx="169.3" cy="60" r="2.6"/><circle cx="169.3" cy="140" r="2.6"/><circle cx="100" cy="180" r="2.6"/><circle cx="30.7" cy="140" r="2.6"/><circle cx="30.7" cy="60" r="2.6"/></g></svg></div>` + CONFIG.portraits.map((src, i) => `<img src="${src}" alt="${CONFIG.bigTitle}"${i ? ' aria-hidden="true"' : ' class="is-on"'}>`).join("");
+  photoEl.innerHTML = `<div class="intro__ring"><svg class="ring" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1"/><g fill="currentColor"><circle cx="100" cy="20" r="2.6"/><circle cx="169.3" cy="60" r="2.6"/><circle cx="169.3" cy="140" r="2.6"/><circle cx="100" cy="180" r="2.6"/><circle cx="30.7" cy="140" r="2.6"/><circle cx="30.7" cy="60" r="2.6"/></g></svg></div>` + CONFIG.portraits.map((p, i) => { const src = p.src || p; return `<img src="${src}" alt="${CONFIG.bigTitle}"${p.pos ? ` style="object-position:${p.pos}"` : ""}${i ? ' aria-hidden="true" loading="lazy"' : ' class="is-on"'}>`; }).join("");
   const imgs = [...photoEl.children];
   let pi = 0;
   if (imgs.length > 1) setInterval(() => {
