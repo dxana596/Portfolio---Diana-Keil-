@@ -387,7 +387,7 @@ const CONFIG = {
       { src: "img/hochzeiten/wed-10.jpg", format: "portrait" },    // Eda & Altan
       { src: "img/hochzeiten/wed-8.jpg",  format: "portrait" },    // Eda & Altan
     ] },
-    { name: "Events", items: [
+    { name: "Events", placeAfter: "kunden-bearbeitet", headerFrom: "kunden-bearbeitet", items: [
       { src: "img/events/evt-6.jpg",  format: "portrait" },    // Redner mit Mikrofon
       { src: "img/events/evt-9.jpg",  format: "landscape" },   // Saal mit Publikum
       { src: "img/events/evt-7.jpg",  format: "portrait" },    // Panel
@@ -757,7 +757,14 @@ function createGallery(cfg, ci, sec){
       const avail = Math.max(120, h - top - bottom);
       d = Math.max(d, PH * h / (avail * 2 * tanH));
       const upp = 2 * d * tanH / h;                       // Welt-Einheiten pro Pixel
-      camY = Math.max(0, (top + avail / 2 - h / 2) * upp);
+      // Balken + Name + Galerie als ein Block senkrecht mittig setzen – kein großes Loch, wenn der Balken klein ist
+      const pad0 = parseFloat(head.style.paddingTop) || parseFloat(getComputedStyle(head).paddingTop) || 0;
+      const headInner = head.offsetHeight - pad0, gapM = Math.max(36, h * 0.05), panelPx = PH / upp;
+      const total = headInner + nameH + gapM + panelPx + 50;
+      const startY = Math.max(40, (h - total) / 2);
+      head.style.paddingTop = startY + "px";
+      const panelTop = startY + headInner + nameH + gapM;
+      camY = (panelTop + panelPx / 2 - h / 2) * upp;
     }
     camera.position.set(0, 0.1, d);
     camera.position.y = camY;
