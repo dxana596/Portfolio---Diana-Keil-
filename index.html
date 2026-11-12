@@ -47,6 +47,15 @@
   .logo--top{position:absolute;top:12px;left:4vw;z-index:12;width:54px;height:54px}
   .logo--top circle[stroke]{stroke-width:5} .logo--top text{font-weight:400}
   .logo--contact{width:110px;height:110px;margin:0 auto 26px;filter:drop-shadow(0 0 14px rgba(196,154,82,.28))}
+  /* Kunden-Leiste: Logos laufen langsam durch */
+  .clients{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);width:min(980px,90vw);z-index:6;text-align:center;opacity:0;transition:opacity 1.2s ease 1.2s}
+  body.is-ready .clients{opacity:1}
+  .clients__label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-lo);margin-bottom:12px}
+  .clients__view{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .clients__track{display:flex;align-items:center;width:max-content;animation:clients 32s linear infinite}
+  .clients__track img{height:30px;width:auto;margin:0 34px;opacity:.6;flex:none}
+  .clients__track img.tall{height:42px}
+  @keyframes clients{to{transform:translateX(-50%)}}
   @media (max-width:700px){ .logo--top{width:40px;height:40px;top:10px;left:12px} .logo--contact{width:88px;height:88px} }
   header{position:absolute;top:0;left:0;right:0;z-index:10;text-align:center;padding:22px 16px 0;font-size:14px}
   header h1{font-weight:400;font-size:inherit}
@@ -60,8 +69,8 @@
   body.is-ready .title span i{transform:none}
 
   /* ---------- Startseite: Foto links, Name + Text rechts ---------- */
-  .intro{flex:1;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:6vw;align-items:center;padding:90px 6vw 70px}
-  .intro__photo{margin:0;justify-self:end;height:calc(100svh - 200px);max-height:820px;aspect-ratio:2/3;max-width:100%;border-radius:4px;overflow:hidden;background:#efedea;display:grid;place-items:center;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:0;transform:translateY(30px);transition:opacity 1.2s ease .2s, transform 1.4s cubic-bezier(.19,1,.22,1) .2s}
+  .intro{flex:1;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:6vw;align-items:center;padding:90px 6vw 130px}
+  .intro__photo{margin:0;justify-self:end;height:calc(100svh - 260px);max-height:820px;aspect-ratio:2/3;max-width:100%;border-radius:4px;overflow:hidden;background:#efedea;display:grid;place-items:center;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:0;transform:translateY(30px);transition:opacity 1.2s ease .2s, transform 1.4s cubic-bezier(.19,1,.22,1) .2s}
   .intro__photo{position:relative;overflow:visible;background:none}
   .intro__photo img{border-radius:4px}
   /* Ring mit Punkten (aus dem Logo) hinter dem Foto, dreht sich langsam */
@@ -75,8 +84,10 @@
   .intro__lead{margin-top:30px;max-width:40ch;font-size:16px;line-height:1.65;color:#333;opacity:0;transition:opacity 1.2s ease .9s}
   body.is-ready .intro__lead{opacity:1}
   @media (max-width:760px){
-    .intro{grid-template-columns:1fr;gap:26px;align-content:center;padding:70px 16px 40px}
-    .intro__photo{justify-self:center;height:44svh;width:auto}
+    .intro{grid-template-columns:1fr;gap:26px;align-content:center;padding:70px 16px 110px}
+    .intro__photo{justify-self:center;height:40svh;width:auto}
+    .clients{bottom:22px}
+    .clients__track img{height:22px;margin:0 22px}
     .intro__text{text-align:center}
     .intro__lead{margin:18px auto 0;font-size:15px}
   }
@@ -263,6 +274,10 @@
   <nav class="topnav" aria-label="Seiten">
     <a href="#kontakt">Kontakt</a>
   </nav>
+  <div class="clients" aria-label="Kunden">
+    <div class="clients__label">Gearbeitet mit</div>
+    <div class="clients__view"><div class="clients__track"><img src="img/kunden/123gold.png" alt="123 Gold"><img src="img/kunden/dertour.png" alt="DERTOUR"><img src="img/kunden/brautvilla.png" alt="Brautvilla by Peltner" class="tall"><img src="img/kunden/baf-fashion.png" alt="BAF Fashion" class="tall"><img src="img/kunden/kayl-visuals.png" alt="KAYL Visuals" class="tall"><img src="img/kunden/123gold.png" aria-hidden="true" alt="123 Gold"><img src="img/kunden/dertour.png" aria-hidden="true" alt="DERTOUR"><img src="img/kunden/brautvilla.png" aria-hidden="true" alt="Brautvilla by Peltner" class="tall"><img src="img/kunden/baf-fashion.png" aria-hidden="true" alt="BAF Fashion" class="tall"><img src="img/kunden/kayl-visuals.png" aria-hidden="true" alt="KAYL Visuals" class="tall"></div></div>
+  </div>
   <a class="scrollcue" href="#kontakt"><span class="scrollcue__line"></span>Kontakt</a>
 </section>
 
