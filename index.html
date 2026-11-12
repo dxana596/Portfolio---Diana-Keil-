@@ -387,7 +387,7 @@ const CONFIG = {
       { src: "img/hochzeiten/wed-10.jpg", format: "portrait" },    // Eda & Altan
       { src: "img/hochzeiten/wed-8.jpg",  format: "portrait" },    // Eda & Altan
     ] },
-    { name: "Events", placeAfter: "kunden-bearbeitet", headerFrom: "kunden-bearbeitet", items: [
+    { name: "Events", placeAfter: "model-shootings", items: [
       { src: "img/events/evt-6.jpg",  format: "portrait" },    // Redner mit Mikrofon
       { src: "img/events/evt-9.jpg",  format: "landscape" },   // Saal mit Publikum
       { src: "img/events/evt-7.jpg",  format: "portrait" },    // Panel
@@ -401,7 +401,7 @@ const CONFIG = {
       { src: "img/portraits/por-3.jpg", format: "portrait" },
       { src: "img/portraits/por-5.jpg", format: "portrait" } ] },
     // Model Shootings: Freaky Nation (img/portraits/fn-…) + Studio-Shooting (img/model/mod-…)
-    { name: "Model Shootings", format: "portrait", items: [
+    { name: "Model Shootings", placeAfter: "kunden-bearbeitet", headerFrom: "kunden-bearbeitet", format: "portrait", items: [
       { src: "img/portraits/fn-1.jpg" },
       { src: "img/portraits/fn-4.jpg", format: "landscape" },
       { src: "img/model/mod-1.jpg" },   // Studio – beiges Outfit mit Tasche
@@ -864,7 +864,8 @@ function createGallery(cfg, ci, sec){
 }
 
 // Galerien mit placeAfter an eine andere Stelle der Seite setzen (z. B. Real Estate direkt unter „Selbst fotografiert für“)
-CONFIG.galleries.forEach((cfg, ci) => { const ref = cfg.placeAfter && document.getElementById(cfg.placeAfter); if (ref) ref.after(sections[ci]); });
+for (let pass = 0; pass < 3; pass++)   // mehrfach, damit Ketten (A nach B nach C) unabhängig von der Reihenfolge stimmen
+  CONFIG.galleries.forEach((cfg, ci) => { const ref = cfg.placeAfter && document.getElementById(cfg.placeAfter); if (ref) ref.after(sections[ci]); });
 // headerFrom: einen Block (z. B. Logo-Balken) oben in dieselbe Seite wie die Galerie setzen – kein Riesen-Abstand dazwischen
 CONFIG.galleries.forEach((cfg, ci) => { const head = cfg.headerFrom && document.getElementById(cfg.headerFrom); if (head) { head.classList.add("clients--inline"); sections[ci].querySelector(".theme__stage").appendChild(head); } });
 const GALS = CONFIG.galleries.map((cfg, ci) => createGallery(cfg, ci, sections[ci]));
