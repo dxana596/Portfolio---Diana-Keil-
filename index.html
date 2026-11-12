@@ -300,16 +300,15 @@
 <!-- Logos werden per JS aus CONFIG.clients in die Balken gesetzt -->
 <section class="clients" id="kunden" aria-label="Kunden">
   <div class="eyebrow reveal">(Kunden)</div>
-  <h2 class="clients__title reveal">Gearbeitet mit</h2>
   <div class="marquee reveal" id="mqFoto">
-    <div class="marquee__label">Selbst fotografiert für</div>
+    <div class="marquee__label">Production</div>
     <div class="marquee__view"><div class="marquee__track"></div></div>
   </div>
 </section>
 <!-- hier wird per JS die Galerie mit placeAfter: "kunden" eingesetzt (Real Estate) -->
-<section class="clients clients--edit" id="kunden-bearbeitet" aria-label="Bearbeitet für">
+<section class="clients clients--edit" id="kunden-bearbeitet" aria-label="Post Production">
   <div class="marquee marquee--rev reveal" id="mqEdit">
-    <div class="marquee__label">Bearbeitet für</div>
+    <div class="marquee__label">Post Production</div>
     <div class="marquee__view"><div class="marquee__track"></div></div>
   </div>
 </section>
@@ -874,7 +873,7 @@ function createGallery(cfg, ci, sec){
   return g;
 }
 
-// Galerien mit placeAfter an eine andere Stelle der Seite setzen (z. B. Real Estate direkt unter „Selbst fotografiert für“)
+// Galerien mit placeAfter an eine andere Stelle der Seite setzen (z. B. Hochzeiten direkt unter dem Balken „Production“)
 for (let pass = 0; pass < 3; pass++)   // mehrfach, damit Ketten (A nach B nach C) unabhängig von der Reihenfolge stimmen
   CONFIG.galleries.forEach((cfg, ci) => { const ref = cfg.placeAfter && document.getElementById(cfg.placeAfter); if (ref) ref.after(sections[ci]); });
 // headerFrom: einen Block (z. B. Logo-Balken) oben in dieselbe Seite wie die Galerie setzen – kein Riesen-Abstand dazwischen
