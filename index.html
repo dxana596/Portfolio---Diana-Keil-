@@ -749,7 +749,8 @@ function createGallery(cfg, ci, sec){
     let camY = isHero ? 0.35 : 0;   // oben: Streifen etwas unter die Mitte, Platz für den Namen darüber
     const head = sec.querySelector(".clients--inline");
     if (head) {   // Seite mit Logo-Balken oben: Galerie passt in den Platz darunter (Name + Zähler mit eingerechnet)
-      const top = head.offsetHeight + Math.max(56, h * 0.07), bottom = Math.max(56, h * 0.07);
+      const nameH = (catEl.firstElementChild ? catEl.firstElementChild.offsetHeight : 50) + Math.max(14, h * 0.02);
+      const top = head.offsetHeight + nameH + Math.max(36, h * 0.05), bottom = Math.max(56, h * 0.07);
       const avail = Math.max(120, h - top - bottom);
       d = Math.max(d, PH * h / (avail * 2 * tanH));
       const upp = 2 * d * tanH / h;                       // Welt-Einheiten pro Pixel
@@ -907,6 +908,9 @@ sections.forEach(s => { preIO.observe(s); visIO.observe(s); });
 
 /* ---------- Größe ---------- */
 function resizeAll(){ GALS.forEach(g => g.resize()); }
+// Logos/Schriften laden später – danach Größen neu berechnen, damit nichts überlappt
+window.addEventListener("load", () => resizeAll());
+if (document.fonts) document.fonts.ready.then(() => resizeAll());
 window.addEventListener("resize", resizeAll);
 resizeAll();
 document.fonts.ready.then(() => { GALS.forEach(g => g.media.forEach(m => m.badge && drawBadge(m))); });
