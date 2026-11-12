@@ -409,7 +409,7 @@ if (CONFIG.portraits.length) {
   photoEl.innerHTML = CONFIG.portraits.map((src, i) => `<img src="${src}" alt="${CONFIG.bigTitle}"${i ? ' aria-hidden="true"' : ' class="is-on"'}>`).join("");
   const imgs = [...photoEl.children];
   let pi = 0;
-  if (imgs.length > 1 && !matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(() => {
+  if (imgs.length > 1) setInterval(() => {
     imgs[pi].classList.remove("is-on");
     pi = (pi + 1) % imgs.length;
     imgs[pi].classList.add("is-on");
@@ -930,7 +930,7 @@ function tick(){
   const dt = Math.min(clock.getDelta(), 0.25);
   const t = clock.elapsedTime;
   const k = (rate) => 1 - Math.exp(-rate * dt);   // framerate-unabhängiges Dämpfen
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const reduce = false;   // Galerien laufen immer, auch wenn am Gerät „Bewegung reduzieren“ an ist
   GALS.forEach(g => { if (g.visible) g.update(dt, t, k, reduce); });
   requestAnimationFrame(tick);
 }
