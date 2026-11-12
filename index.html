@@ -89,8 +89,8 @@
   .intro__photo img{border-radius:4px}
   /* Ring mit Punkten (aus dem Logo) hinter dem Foto, dreht sich langsam */
   .intro__ring{position:absolute;left:50%;top:50%;height:122%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:-1;color:var(--gold);opacity:.55;pointer-events:none}
-  /* Name + Text: linksbündig, dahinter weichgezeichnet, damit der Ring den Text nicht stört */
-  .intro__text{position:relative;z-index:2;justify-self:start;padding:28px 32px;margin-left:-32px;border-radius:18px;background:rgba(240,235,226,.45);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+  /* Name + Text: linksbündig */
+  .intro__text{position:relative;z-index:2;justify-self:start}
   .intro__text .title{margin-left:-.034em}   /* das „D“ hat links etwas Luft – so steht es genau bündig mit dem Text */
   .intro__ring .ring{width:100%;height:100%;animation:ringspin 90s linear infinite}
   @keyframes ringspin{to{transform:rotate(360deg)}}
@@ -103,7 +103,7 @@
   @media (max-width:760px){
     .intro{grid-template-columns:1fr;gap:26px;align-content:center;padding:70px 16px 40px}
     .intro__photo{justify-self:center;height:44svh;width:auto}
-    .intro__text{text-align:center;justify-self:center;margin-left:0;padding:18px 16px}
+    .intro__text{text-align:center;justify-self:center}
     .intro__text .title{margin-left:0}
     .intro__lead{margin:18px auto 0;font-size:15px}
   }
