@@ -408,7 +408,7 @@ const CONFIG = {
       { src: "img/model/mod-4.jpg" },   // Studio – lila Hose
     ] },
     // Real Estate: deine Fotos gemischt – "portrait" = Hochformat, "landscape" = Querformat (wie das Foto aufgenommen ist)
-    { name: "Real Estate – DERTOUR", items: [
+    { name: "Real Estate", items: [
       { src: "img/social/social-1.jpg",     format: "portrait" },
       { src: "img/realestate/re-1.jpg",     format: "landscape" },
       { src: "img/social/social-2.jpg",     format: "portrait" },
@@ -443,10 +443,10 @@ const CONFIG = {
       { src: "img/kunden/123gold.png",     name: "123 Gold" },
       { src: "img/kunden/brautvilla.png",  name: "Brautvilla by Peltner", tall: true },
       { src: "img/kunden/baf-fashion.png", name: "BAF Fashion", tall: true },
-      { src: "img/kunden/dertour.png",     name: "DERTOUR" },
     ],
     edit: [
-      // leer = Balken „Bearbeitet für“ wird ausgeblendet
+      { src: "img/kunden/dertour.png",      name: "DERTOUR" },
+      { src: "img/kunden/kayl-visuals.png", name: "KAYL Visuals", tall: true },
     ],
   },
   autoSpeed: 0.45,   // Geschwindigkeit der automatischen Drehung (0 = aus)
@@ -485,7 +485,7 @@ if (CONFIG.portraits.length) {
 /* ---------- Galerien: unter der Startseite je ein Abschnitt pro Thema ---------- */
 const N = CONFIG.galleries.length;
 const pad = n => String(n).padStart(2, "0");
-const slug = s => s.toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const slug = s => s.toLowerCase().replace(/\s+/g, "-");
 const themesEl = document.getElementById("themes");
 const sections = CONFIG.galleries.map(cfg => {
   const sec = document.createElement("section");
