@@ -1,0 +1,929 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diana Keil – Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff; --fg:#0b0b0b; --muted:#6b6b6b;
+    --glass:rgba(80,80,80,.36); --glass-btn:rgba(255,255,255,.2);
+    --serif:"Instrument Serif", "Times New Roman", serif;
+    --sans:"Inter", system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  /* Seiten-Scroll: jede Galerie ist eine eigene Bildschirmseite, beim Scrollen rastet die Seite ein */
+  html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
+  .hero,.theme,.contact{scroll-snap-align:start;scroll-snap-stop:always}
+  body{overflow-x:hidden;background:var(--bg);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* ---------- Loader ---------- */
+  .loader{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:var(--bg);transition:opacity .8s ease, visibility .8s}
+  .loader.is-done{opacity:0;visibility:hidden}
+  .loader__inner{text-align:center}
+  .loader__name{font-family:var(--serif);font-size:44px;letter-spacing:-.01em;line-height:1}
+  .loader__pct{font-size:13px;margin-top:14px;font-variant-numeric:tabular-nums}
+  .loader__arc{position:absolute;left:50%;top:50%;width:260px;height:260px;transform:translate(-50%,-50%) rotate(-90deg)}
+  .loader__arc circle{fill:none;stroke:var(--fg);stroke-width:1.2;stroke-linecap:round;transition:stroke-dashoffset .3s ease}
+
+  /* ---------- Header ---------- */
+  .hero{position:relative;height:100vh;height:100svh;min-height:560px;overflow:hidden;display:flex}
+  header{position:absolute;top:0;left:0;right:0;z-index:10;text-align:center;padding:22px 16px 0;font-size:14px}
+  header h1{font-weight:400;font-size:inherit}
+  header a{text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+  /* ---------- Big title ---------- */
+  .title{font-family:var(--serif);font-weight:400;font-size:clamp(64px,8.5vw,150px);line-height:.88;letter-spacing:-.01em}
+  .title .w{display:inline-block;white-space:nowrap}
+  .title span{display:inline-block;overflow:hidden;vertical-align:top}
+  .title span i{display:inline-block;font-style:normal;transform:translateY(105%);transition:transform 1.2s cubic-bezier(.19,1,.22,1)}
+  body.is-ready .title span i{transform:none}
+
+  /* ---------- Startseite: Foto links, Name + Text rechts ---------- */
+  .intro{flex:1;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:6vw;align-items:center;padding:90px 6vw 70px}
+  .intro__photo{margin:0;justify-self:end;height:calc(100svh - 200px);max-height:820px;aspect-ratio:2/3;max-width:100%;border-radius:4px;overflow:hidden;background:#efedea;display:grid;place-items:center;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:0;transform:translateY(30px);transition:opacity 1.2s ease .2s, transform 1.4s cubic-bezier(.19,1,.22,1) .2s}
+  .intro__photo{position:relative}
+  .intro__photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 1.8s ease}
+  .intro__photo img.is-on{opacity:1}
+  body.is-ready .intro__photo{opacity:1;transform:none}
+  .intro__lead{margin-top:30px;max-width:40ch;font-size:16px;line-height:1.65;color:#333;opacity:0;transition:opacity 1.2s ease .9s}
+  body.is-ready .intro__lead{opacity:1}
+  @media (max-width:760px){
+    .intro{grid-template-columns:1fr;gap:26px;align-content:center;padding:70px 16px 40px}
+    .intro__photo{justify-self:center;height:44svh;width:auto}
+    .intro__text{text-align:center}
+    .intro__lead{margin:18px auto 0;font-size:15px}
+  }
+
+  /* ---------- WebGL ---------- */
+  canvas.gl{position:absolute;inset:0;width:100%;height:100%;z-index:2;cursor:grab;touch-action:pan-y}
+  canvas.gl:active{cursor:grabbing}
+
+  /* ---------- Eine Galerie pro Thema (unter der ersten) ---------- */
+  .theme{position:relative;z-index:5;background:var(--bg);height:100vh;height:100svh;min-height:420px;overflow:hidden}
+  .theme__stage{position:absolute;inset:0}
+
+  /* ---------- Category label ---------- */
+  /* Themen-Name: oben links über dem Bildstreifen (Höhe wird im Script an die Oberkante der Bilder gesetzt) */
+  .cat{position:absolute;left:4vw;top:50%;z-index:3;pointer-events:none}
+  .cat__item{position:absolute;left:0;bottom:0;font-family:var(--serif);font-size:clamp(28px,3.2vw,52px);line-height:1;color:var(--fg);opacity:0;white-space:nowrap;transition:opacity .6s ease, transform .9s cubic-bezier(.19,1,.22,1)}
+  .cat__item.is-active{opacity:1}
+  .cat__item.is-up{transform:translateY(-40%)}
+  .cat__item.is-down{transform:translateY(40%)}
+
+  .gal-count{position:absolute;z-index:6;left:50%;top:calc(var(--cy,50%) + var(--ch,120px));transform:translateX(-50%);font-size:12px;letter-spacing:.08em;color:var(--muted);font-variant-numeric:tabular-nums;opacity:0;transition:opacity .8s .8s}
+  body.is-ready .gal-count{opacity:1}
+
+  /* ---------- About overlay ---------- */
+  .about{position:fixed;inset:0;z-index:30;background:rgba(255,255,255,.72);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);display:grid;place-items:center;padding:16px;opacity:0;visibility:hidden;transition:opacity .5s, visibility .5s}
+  .about.is-open{opacity:1;visibility:visible}
+  .about__inner{max-width:560px;text-align:center}
+  .about__eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .about h2{font-family:var(--serif);font-weight:400;font-size:clamp(44px,8vw,84px);line-height:.95;margin:14px 0 22px}
+  .about p{font-size:15px;line-height:1.6;color:#333}
+  .about ul{list-style:none;display:flex;gap:10px;justify-content:center;margin-top:28px;flex-wrap:wrap}
+  .about li a,.about li button{display:inline-block;padding:10px 16px;border-radius:999px;background:#111;color:#fff;text-decoration:none;font:600 12px var(--sans);letter-spacing:.04em;text-transform:uppercase;border:0;cursor:pointer}
+  .about__close{position:absolute;top:18px;right:18px;width:40px;height:40px;border-radius:50%;border:0;background:#111;color:#fff;font-size:18px;cursor:pointer}
+
+  .grain{position:fixed;inset:-50%;z-index:4;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");animation:grain 1s steps(6) infinite}
+  @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-3%)}75%{transform:translate(-2%,-1%)}100%{transform:translate(3%,2%)}}
+
+  /* ---------- Hero-Extras ---------- */
+  .topnav{position:absolute;top:18px;right:4vw;z-index:11;display:flex;gap:18px;font-size:13px}
+  .topnav a{text-decoration:none;opacity:.75;transition:opacity .2s}
+  .topnav a:hover{opacity:1}
+  .scrollcue{position:absolute;left:4vw;bottom:34px;z-index:11;display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--fg);opacity:0;transition:opacity 1s .8s}
+  body.is-ready .scrollcue{opacity:.75}
+  .scrollcue__line{position:relative;width:1px;height:40px;background:rgba(0,0,0,.15);overflow:hidden}
+  .scrollcue__line::after{content:"";position:absolute;left:0;top:-40%;width:1px;height:40%;background:var(--fg);animation:cue 1.8s cubic-bezier(.65,0,.35,1) infinite}
+  @keyframes cue{to{top:100%}}
+
+  /* ---------- Sections ---------- */
+  .wrap{padding:0 4vw}
+  .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .h2{font-family:var(--serif);font-weight:400;font-size:clamp(44px,6vw,96px);line-height:.88;letter-spacing:-.01em}
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity 1s ease, transform 1.2s cubic-bezier(.19,1,.22,1)}
+  .reveal.is-in{opacity:1;transform:none}
+
+  .services{position:relative;z-index:5;background:var(--bg);padding:120px 0 100px}
+  .services__head{display:grid;grid-template-columns:1fr minmax(260px,380px);gap:40px;align-items:end;margin-bottom:56px}
+  .services__head .h2{margin-top:18px}
+  .services__intro{font-size:16px;line-height:1.6;color:#333}
+  .svc2{border-bottom:1px solid rgba(0,0,0,.12)}
+  .svc2__card{border-top:1px solid rgba(0,0,0,.12)}
+  .svc2__head{width:100%;display:grid;grid-template-columns:56px 1fr minmax(200px,320px) 40px;gap:24px;align-items:center;padding:22px 0;background:none;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+  .svc2__num{font-size:12px;letter-spacing:.08em;color:var(--muted);font-variant-numeric:tabular-nums}
+  .svc2__title{font-family:var(--serif);font-weight:400;font-size:clamp(30px,3.2vw,52px);line-height:.95;letter-spacing:-.01em;transition:transform .7s cubic-bezier(.19,1,.22,1)}
+  .svc2__head:hover .svc2__title,.svc2__card.is-open .svc2__title{transform:translateX(10px);font-style:italic}
+  .svc2__short{font-size:14px;line-height:1.5;color:#444}
+  .svc2__toggle{width:40px;height:40px;border-radius:50%;border:1px solid rgba(0,0,0,.2);display:grid;place-items:center;transition:transform .6s cubic-bezier(.19,1,.22,1), background .3s, color .3s, border-color .3s}
+  .svc2__toggle svg{width:14px;height:14px}
+  .svc2__head:hover .svc2__toggle{border-color:var(--fg)}
+  .svc2__card.is-open .svc2__toggle{transform:rotate(45deg);background:var(--fg);color:#fff;border-color:var(--fg)}
+  .svc2__more{display:grid;grid-template-rows:0fr;transition:grid-template-rows .9s cubic-bezier(.19,1,.22,1)}
+  .svc2__more > div{overflow:hidden}
+  .svc2__card.is-open .svc2__more{grid-template-rows:1fr}
+  .svc2__detail{display:grid;grid-template-columns:56px auto minmax(0,1fr);gap:24px 4vw;align-items:end;padding:4px 0 40px}
+  .svc2__media{grid-column:2;position:relative;overflow:hidden;border-radius:4px;aspect-ratio:4/5;width:300px;background:#e9e7e3;clip-path:inset(0 0 100% 0);transition:clip-path 1.1s cubic-bezier(.77,0,.18,1)}
+  .svc2__card--wide .svc2__media{aspect-ratio:3/2;width:520px}
+  .svc2__media img{width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block;transform:scale(1.15);transition:transform 1.6s cubic-bezier(.19,1,.22,1)}
+  .svc2__card.is-open .svc2__media{clip-path:inset(0 0 0 0)}
+  .svc2__card.is-open .svc2__media img{transform:scale(1)}
+  .svc2__info{opacity:0;transform:translateY(20px);transition:opacity .6s ease, transform .9s cubic-bezier(.19,1,.22,1)}
+  .svc2__card.is-open .svc2__info{opacity:1;transform:none;transition-delay:.25s}
+  .svc2__text{font-size:14px;line-height:1.65;color:#444;max-width:44ch}
+  .svc2__tags{list-style:none;display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .svc2__tags li{padding:6px 12px;border-radius:999px;border:1px solid rgba(0,0,0,.14);font-size:12px;color:#333}
+  .svc2__link{display:inline-flex;align-items:center;gap:10px;margin-top:26px;font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--fg);text-decoration:none;padding-bottom:6px;border-bottom:1px solid currentColor}
+  .svc2__link span{display:inline-block;transition:transform .5s cubic-bezier(.19,1,.22,1)}
+  .svc2__link:hover span{transform:translateX(6px)}
+  .pill{align-self:flex-start;display:inline-flex;align-items:center;gap:10px;padding:13px 20px;border-radius:999px;background:var(--fg);color:#fff;text-decoration:none;font:600 12px var(--sans);letter-spacing:.05em;text-transform:uppercase;transition:transform .3s}
+  .pill:hover{transform:translateY(-2px)}
+
+  .process{position:relative;z-index:5;background:var(--bg);padding:40px 0 140px}
+  .process__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px}
+  .step{padding:28px;border-radius:14px;background:#f4f3f1;min-height:240px;display:flex;flex-direction:column;justify-content:space-between}
+  .step__n{font-family:var(--serif);font-size:64px;line-height:1}
+  .step h3{font-weight:600;font-size:16px;margin-bottom:8px}
+  .step p{font-size:14px;line-height:1.55;color:#444}
+
+  .contact{position:relative;z-index:5;background:#0b0b0b;color:#fff;padding:140px 0 40px;text-align:center;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center}
+  .contact .eyebrow{color:rgba(255,255,255,.55)}
+  .contact .h2{margin:22px 0 36px;font-size:clamp(34px,4.4vw,70px)}
+  .contact__mail{display:inline-block;font-family:var(--serif);font-size:clamp(22px,2.8vw,40px);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:4px;transition:border-color .3s}
+  .contact__mail:hover{border-color:#fff}
+  .contact__social{display:flex;gap:22px;justify-content:center;margin-top:34px;font-size:13px}
+  .contact__social a{opacity:.7;text-decoration:none}
+  .contact__social a:hover{opacity:1}
+  footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:120px;padding-top:24px;border-top:1px solid rgba(255,255,255,.15);font-size:12px;color:rgba(255,255,255,.5)}
+
+  /* ---------- Großansicht (Lightbox) ---------- */
+  .lb{position:fixed;inset:0;z-index:45;display:grid;place-items:center;
+    /* dunkler Hintergrund mit sanfter Vignette + starke Unschärfe der Seite dahinter */
+    background:radial-gradient(ellipse at center, rgba(10,10,10,.82) 0%, rgba(3,3,3,.95) 75%);
+    -webkit-backdrop-filter:blur(0px) saturate(1);backdrop-filter:blur(0px) saturate(1);
+    opacity:0;visibility:hidden;transition:opacity .6s ease, visibility .6s, backdrop-filter .8s ease, -webkit-backdrop-filter .8s ease}
+  .lb.is-open{opacity:1;visibility:visible;-webkit-backdrop-filter:blur(36px) saturate(.7);backdrop-filter:blur(36px) saturate(.7)}
+  .lb__stage{position:relative;display:grid;place-items:center;width:100%;height:100%;padding:72px 96px 96px}
+  .lb__item{grid-area:1/1;outline:1px solid rgba(255,255,255,.06);max-width:calc(100vw - 192px);max-height:calc(100vh - 168px);max-height:calc(100dvh - 168px);width:auto;height:auto;object-fit:contain;border-radius:6px;box-shadow:0 40px 120px rgba(0,0,0,.65), 0 10px 30px rgba(0,0,0,.4);opacity:0;transform:scale(.94);transition:opacity .5s ease, transform .7s cubic-bezier(.19,1,.22,1)}
+  .lb__item.is-in{opacity:1;transform:none}
+  .lb__item.is-out{opacity:0;transform:scale(.97);transition-duration:.3s}
+  .lb__bar{position:absolute;left:0;right:0;bottom:28px;display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;padding:0 16px;color:rgba(255,255,255,.85);font-size:13px;letter-spacing:.03em}
+  .lb__theme{font-family:var(--serif);font-size:22px;color:#fff;letter-spacing:0}
+  .lb__count{font-variant-numeric:tabular-nums;color:rgba(255,255,255,.5)}
+  .lb__link{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.4);padding-bottom:2px}
+  .lb__link:hover{border-color:#fff}
+  .lb__btn{position:absolute;z-index:2;width:52px;height:52px;border-radius:50%;border:0;cursor:pointer;color:#fff;background:rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:grid;place-items:center;transition:background .2s, transform .2s}
+  .lb__btn:hover{background:rgba(255,255,255,.22)}
+  .lb__btn:focus-visible{outline:2px solid #fff;outline-offset:3px}
+  .lb__btn svg{width:20px;height:20px}
+  .lb__close{top:18px;right:18px}
+  .lb__prev{left:22px;top:50%;transform:translateY(-50%)}
+  .lb__next{right:22px;top:50%;transform:translateY(-50%)}
+  @media (max-width:640px){
+    .lb__stage{padding:64px 12px 110px}
+    .lb__item{max-width:calc(100vw - 24px);max-height:calc(100vh - 174px);max-height:calc(100dvh - 174px)}
+    .lb__prev,.lb__next{top:auto;bottom:70px;transform:none;width:44px;height:44px}
+    .lb__prev{left:16px}.lb__next{right:16px}
+    .lb__bar{bottom:24px}
+  }
+
+  @media (max-width:1100px){ .scrollcue{display:none} }
+  @media (max-width:860px){
+    .services__head{grid-template-columns:1fr;gap:24px;margin-bottom:50px}
+    .svc2__head{grid-template-columns:34px 1fr 44px;gap:12px;padding:26px 0}
+    .svc2__short{display:none}
+    .svc2__toggle{width:44px;height:44px}
+    .svc2__title{font-size:34px}
+    .svc2__head:hover .svc2__title,.svc2__card.is-open .svc2__title{transform:none}
+    .svc2__detail{grid-template-columns:1fr;padding-bottom:40px}
+    .svc2__media,.svc2__card--wide .svc2__media{grid-column:1;width:100%}
+    .process__grid{grid-template-columns:1fr}
+    .step{min-height:0;gap:30px}
+  }
+  @media (max-width:640px){
+    .topnav,.scrollcue{display:none}
+    .services{padding:100px 0 80px}
+    .contact{padding:100px 0 30px}
+    .title{top:12vh}
+  }
+  @media (prefers-reduced-motion:reduce){ .grain{animation:none} }
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader">
+  <svg class="loader__arc" viewBox="0 0 100 100"><circle id="loaderArc" cx="50" cy="50" r="48"/></svg>
+  <div class="loader__inner">
+    <div class="loader__name" id="loaderName">Diana</div>
+    <div class="loader__pct" id="loaderPct">0%</div>
+  </div>
+</div>
+
+<section class="hero" id="hero">
+  <header>
+    <h1><a id="aboutLink">Diana</a> is a photographer from Germany.</h1>
+  </header>
+  <div class="intro">
+    <figure class="intro__photo" id="introPhoto"><span>Hier kommt dein Foto hin</span></figure>
+    <div class="intro__text">
+      <h2 class="title" id="title"><span class="sr-only"></span><span id="titleInner" aria-hidden="true"></span></h2>
+      <p class="intro__lead" id="introText"></p>
+    </div>
+  </div>
+  <nav class="topnav" aria-label="Seiten">
+    <a href="#kontakt">Kontakt</a>
+  </nav>
+  <a class="scrollcue" href="#kontakt"><span class="scrollcue__line"></span>Kontakt</a>
+</section>
+
+<!-- Weitere Themen: jede Galerie wird automatisch aus CONFIG.galleries erzeugt -->
+<div id="themes"></div>
+
+<!-- ===================== KONTAKT ===================== -->
+<section class="contact" id="kontakt">
+  <div class="wrap">
+    <div class="eyebrow reveal">(Kontakt)</div>
+    <h2 class="h2 reveal">Lern mich und<br>meine Arbeit kennen.</h2>
+    <a class="contact__mail reveal" id="contactMail" href="mailto:diana.keil09@gmail.com">diana.keil09@gmail.com</a>
+    <div class="contact__social reveal">
+      <a href="https://www.instagram.com/diana.keil_/" target="_blank" rel="noopener">Instagram</a>
+    </div>
+    <footer>
+      <span>© <span id="year"></span> <span id="footName">Diana</span></span>
+      <span><a href="#" style="text-decoration:none">Impressum</a> · <a href="#" style="text-decoration:none">Datenschutz</a></span>
+    </footer>
+  </div>
+</section>
+
+
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Großansicht" aria-hidden="true">
+  <div class="lb__stage" id="lbStage"></div>
+  <button class="lb__btn lb__close" id="lbClose" aria-label="Schließen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <button class="lb__btn lb__prev" id="lbPrev" aria-label="Vorheriges"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4M10 6l-6 6 6 6"/></svg></button>
+  <button class="lb__btn lb__next" id="lbNext" aria-label="Nächstes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16M14 6l6 6-6 6"/></svg></button>
+  <div class="lb__bar">
+    <span class="lb__theme" id="lbTheme"></span>
+    <span class="lb__count" id="lbCount"></span>
+    <span id="lbViews"></span>
+    <a class="lb__link" id="lbLink" target="_blank" rel="noopener">Auf Instagram ansehen ↗</a>
+  </div>
+</div>
+
+<section class="about" id="about" aria-hidden="true">
+  <button class="about__close" id="aboutClose" aria-label="Schließen">✕</button>
+  <div class="about__inner">
+    <div class="about__eyebrow">(Photographer)</div>
+    <h2 id="aboutName">Diana</h2>
+    <p>Hi, ich bin Diana und mache Fotos und Videos. Ich habe meine Ausbildung als Mediengestalterin Bild und Ton absolviert und mich auch noch auf Fotografie spezialisiert.</p>
+    <ul>
+      <li><button id="copyMail">E-Mail kopieren</button></li>
+      <li><a href="https://www.instagram.com/diana.keil_/" target="_blank" rel="noopener">Instagram</a></li>
+    </ul>
+  </div>
+</section>
+
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from "three";
+
+/* =========================================================
+   KONFIGURATION – hier eigene Inhalte eintragen
+   ========================================================= */
+const CONFIG = {
+  name: "Diana",
+  email: "diana.keil09@gmail.com",
+  bigTitle: "Diana Keil",
+  // Galerien – oben läuft eine Übersicht mit allen Themen, darunter bekommt jedes Thema seine eigene Galerie.
+  // "items" sind eigene Bild-Pfade ("img/hochzeiten/wed-1.jpg") oder Videos (".mp4" / ".webm").
+  // format: "portrait" = nur 9:16 (z. B. für Social-Media-Videos), "landscape" = nur 16:9
+  look: [1, 1, 1],   // neutral (keine Tönung)
+  galleries: [
+    { name: "Hochzeiten", items: [
+      // Hochformat und Querformat möglichst verteilt (nur 2 Querformate)
+      { src: "img/hochzeiten/wed-2.jpg",  format: "portrait" },
+      { src: "img/hochzeiten/wed-1.jpg",  format: "landscape" },
+      { src: "img/hochzeiten/wed-6.jpg",  format: "portrait" },    // Eda & Altan – Brautstrauß
+      { src: "img/hochzeiten/wed-3.jpg",  format: "portrait" },
+      { src: "img/hochzeiten/wed-9.jpg",  format: "portrait" },    // Eda & Altan
+      { src: "img/hochzeiten/wed-7.jpg",  format: "portrait" },    // Eda & Altan
+      { src: "img/hochzeiten/wed-5.jpg",  format: "landscape" },   // Eda & Altan
+      { src: "img/hochzeiten/wed-4.jpg",  format: "portrait" },
+      { src: "img/hochzeiten/wed-10.jpg", format: "portrait" },    // Eda & Altan
+      { src: "img/hochzeiten/wed-8.jpg",  format: "portrait" },    // Eda & Altan
+    ] },
+    { name: "Events", items: [
+      { src: "img/events/evt-1.jpg",  format: "portrait" },
+      { src: "img/events/evt-2.jpg",  format: "landscape" },
+      { src: "img/events/evt-5.jpg",  format: "portrait" },    // Bühne – Talk
+      { src: "img/events/evt-9.jpg",  format: "landscape" },   // Saal mit Publikum
+      { src: "img/events/evt-6.jpg",  format: "portrait" },    // Redner mit Mikrofon
+      { src: "img/events/evt-4.jpg",  format: "landscape" },
+      { src: "img/events/evt-3.jpg",  format: "portrait" },
+      { src: "img/events/evt-7.jpg",  format: "portrait" },    // Panel
+      { src: "img/events/evt-10.jpg", format: "landscape" },   // Gäste am Tisch
+      { src: "img/events/evt-8.jpg",  format: "portrait" },    // Vortrag vor Roll-up
+    ] },
+    { name: "Portraits", items: [
+      { src: "img/portraits/por-2.jpg", format: "portrait" },
+      { src: "img/portraits/por-4.jpg", format: "portrait" },
+      { src: "img/portraits/por-1.jpg", format: "landscape" },
+      { src: "img/portraits/por-3.jpg", format: "portrait" },
+      { src: "img/portraits/por-5.jpg", format: "portrait" } ] },
+    // Model Shootings: Freaky Nation (img/portraits/fn-…) + Studio-Shooting (img/model/mod-…)
+    { name: "Model Shootings", format: "portrait", items: [
+      { src: "img/portraits/fn-1.jpg" },
+      { src: "img/portraits/fn-4.jpg", format: "landscape" },
+      { src: "img/model/mod-1.jpg" },   // Studio – beiges Outfit mit Tasche
+      { src: "img/model/mod-3.jpg" },   // Studio – roter Anzug
+      { src: "img/portraits/fn-3.jpg" },
+      { src: "img/portraits/fn-5.jpg", format: "landscape" },
+      { src: "img/model/mod-2.jpg" },   // Studio – Paar
+      { src: "img/model/mod-4.jpg" },   // Studio – lila Hose
+    ] },
+    // Real Estate: deine Fotos gemischt – "portrait" = Hochformat, "landscape" = Querformat (wie das Foto aufgenommen ist)
+    { name: "Real Estate", items: [
+      { src: "img/social/social-1.jpg",     format: "portrait" },
+      { src: "img/realestate/re-1.jpg",     format: "landscape" },
+      { src: "img/social/social-2.jpg",     format: "portrait" },
+      { src: "img/social/social-3.jpg",     format: "portrait" },
+      { src: "img/realestate/re-2.jpg",     format: "landscape" },
+      { src: "img/social/social-4.jpg",     format: "portrait" },
+      { src: "img/realestate/re-3.jpg",     format: "landscape" },
+      { src: "img/social/social-5.jpg",     format: "portrait" },
+      { src: "img/realestate/re-4.jpg",     format: "landscape" },
+      { src: "img/social/social-6.jpg",     format: "portrait" },
+    ] },
+    // Instagram-Reels: Reel als .mp4 speichern (z. B. "videos/reel-1.mp4"), dazu den Link zum Reel
+    // und die Aufrufe eintragen. Klick auf das Video öffnet das Reel auf Instagram.
+    // (Platzhalter: Beispielvideos + ausgedachte Zahlen)
+    { name: "Social Media", format: "portrait", items: [
+      // Reels
+      // src = Video-Datei, url = Reel auf Instagram, views = Aufrufe (Zahl eintragen, dann wird sie eingeblendet)
+      { src: "videos/reel-1.mp4", url: "https://www.instagram.com/reel/Dd9gQgvyhEW/", views: 18000 },   // 01 Kennenlernen & Laden vorstellen
+      { src: "videos/reel-2.mp4", url: "https://www.instagram.com/reel/De2C6g0Snht/", views: 17000 },   // 02 Laden vorstellen – Sandro
+    ] },
+  ],
+  // Platzhalterbilder – ersetze durch eigene URLs (z. B. "img/foto1.jpg")
+  imageUrl: (id, w = 1600, h = 900) => `https://picsum.photos/seed/${id}/${w}/${h}`,
+  // Startseite: Fotos von dir (wechseln sich sanft ab; leere Liste = Platzhalter) und kleiner Text unter dem Namen
+  portraits: ["img/about/diana.jpg", "img/about/diana-2.jpg"],
+  introText: "Hi, ich bin Diana und mache Fotos und Videos. Ich habe meine Ausbildung als Mediengestalterin Bild und Ton absolviert und mich auch noch auf Fotografie spezialisiert.",
+  autoSpeed: 0.45,   // Geschwindigkeit der automatischen Drehung (0 = aus)
+};
+
+/* ---------- Text / DOM setup ---------- */
+document.getElementById("loaderName").textContent = CONFIG.name;
+document.getElementById("aboutLink").textContent = CONFIG.name;
+document.getElementById("aboutName").textContent = CONFIG.name;
+document.getElementById("footName").textContent = CONFIG.name;
+document.getElementById("year").textContent = new Date().getFullYear();
+const contactMail = document.getElementById("contactMail");
+contactMail.textContent = CONFIG.email; contactMail.href = "mailto:" + CONFIG.email;
+const hero = document.getElementById("hero");
+
+/* ---------- Startseite: Name, Text, Foto ---------- */
+const titleInner = document.getElementById("titleInner");
+document.querySelector("#title .sr-only").textContent = CONFIG.bigTitle;
+let li = 0;
+titleInner.innerHTML = CONFIG.bigTitle.split(" ").map(word =>
+  `<span class="w">${[...word].map(c => `<span><i style="transition-delay:${0.25 + (li++) * 0.05}s">${c}</i></span>`).join("")}</span>`).join(" ");
+document.getElementById("introText").textContent = CONFIG.introText;
+// Fotos von dir: liegen übereinander und wechseln sich alle 5 Sekunden sanft ab
+if (CONFIG.portraits.length) {
+  const photoEl = document.getElementById("introPhoto");
+  photoEl.innerHTML = CONFIG.portraits.map((src, i) => `<img src="${src}" alt="${CONFIG.bigTitle}"${i ? ' aria-hidden="true"' : ' class="is-on"'}>`).join("");
+  const imgs = [...photoEl.children];
+  let pi = 0;
+  if (imgs.length > 1 && !matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(() => {
+    imgs[pi].classList.remove("is-on");
+    pi = (pi + 1) % imgs.length;
+    imgs[pi].classList.add("is-on");
+  }, 5000);
+}
+
+/* ---------- Galerien: unter der Startseite je ein Abschnitt pro Thema ---------- */
+const N = CONFIG.galleries.length;
+const pad = n => String(n).padStart(2, "0");
+const slug = s => s.toLowerCase().replace(/\s+/g, "-");
+const themesEl = document.getElementById("themes");
+const sections = CONFIG.galleries.map(cfg => {
+  const sec = document.createElement("section");
+  sec.className = "theme"; sec.id = slug(cfg.name);
+  sec.setAttribute("aria-label", cfg.name);
+  sec.innerHTML = `<div class="theme__stage"><canvas class="gl"></canvas><div class="cat"></div><div class="gal-count"></div></div>`;
+  themesEl.appendChild(sec);
+  return sec;
+});
+
+/* ---------- Three.js: gemeinsame Bausteine ---------- */
+const PH = 2.25, GAP = 0.12;
+const PW = PH * 16 / 9, PWP = PH * 9 / 16;   // Breite 16:9 bzw. 9:16
+const R = PW * 0.8;                          // Zylinderradius (kleiner = stärker gekrümmt)
+const MIN_L = 34;                            // Mindestlänge, damit der Streifen auch auf breiten Bildschirmen immer gefüllt ist
+
+const vert = /* glsl */`
+  uniform float uOffset, uR, uBend, uMirror, uH, uGap, uVel, uTime, uShiftX, uScale;
+  varying vec2 vUv; varying float vY; varying float vFacing; varying float vA;
+  void main(){
+    vUv = uv;
+    vec3 p = position;
+    float s = uOffset + p.x;
+    float y = p.y;
+    if (uMirror > 0.5) y = -p.y - uH - uGap;
+    // geschwindigkeitsabhängige Welle
+    y += sin(s * 0.6 + uTime) * uVel * 0.08;
+    vec3 flatP = vec3(s, y, 0.0);
+    float a = s / uR;
+    vec3 cylP = vec3(uR * sin(a), y, uR * cos(a) - uR);
+    vec3 pos = mix(flatP, cylP, uBend);
+    pos.xy *= uScale;
+    pos.x += uShiftX;
+    vY = p.y / uH + 0.5;
+    vFacing = mix(1.0, cos(a), uBend);
+    vA = a;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  }`;
+const frag = /* glsl */`
+  uniform sampler2D uTex; uniform vec2 uCover; uniform vec3 uTint;
+  uniform sampler2D uBadge; uniform vec4 uBadgeRect; uniform float uHasBadge;
+  uniform float uAlpha, uMirror, uTime, uLoaded, uVel, uBend, uDecode;
+  varying vec2 vUv; varying float vY; varying float vFacing; varying float vA;
+  void main(){
+    vec2 uv = vUv;
+    if (uMirror > 0.5) uv.x += sin(vY * 60.0 + uTime * 2.0) * 0.004;   // leichte Wasserwelle nur in der Spiegelung
+    uv = (uv - 0.5) * uCover + 0.5;
+    // Bild neutral – keine Tönung, kein Farbfilter
+    vec3 col = texture2D(uTex, uv).rgb;
+    // Videos kommen (anders als Fotos) noch sRGB-kodiert an → hier in linear umrechnen
+    if (uDecode > 0.5) col = mix(pow(col * 0.9478672986 + vec3(0.0521327014), vec3(2.4)), col * 0.0773993808, vec3(lessThanEqual(col, vec3(0.04045))));
+    col = mix(vec3(0.93), col, uLoaded);   // hellgrau, solange das Bild lädt
+    // Aufrufe-Badge (unten links auf Reels)
+    if (uHasBadge > 0.5 && uMirror < 0.5) {
+      vec2 bq = (vUv - uBadgeRect.xy) / (uBadgeRect.zw - uBadgeRect.xy);
+      if (bq.x >= 0.0 && bq.x <= 1.0 && bq.y >= 0.0 && bq.y <= 1.0) {
+        vec4 b = texture2D(uBadge, bq);
+        col = mix(col, b.rgb, b.a);
+      }
+    }
+    float a = uAlpha * mix(1.0, 1.0 - smoothstep(2.3, 2.9, abs(vA)), uBend);
+    if (a < 0.003) discard;
+    if (uMirror > 0.5) a *= smoothstep(0.75, 0.0, vY) * 0.42;
+    gl_FragColor = vec4(col, a);
+    #include <colorspace_fragment>
+  }`;
+
+const geoL = new THREE.PlaneGeometry(PW, PH, 48, 1);
+const geoP = new THREE.PlaneGeometry(PWP, PH, 16, 1);
+const loader = new THREE.TextureLoader();
+loader.setCrossOrigin("anonymous");
+const LOOK = new THREE.Vector3(...CONFIG.look);
+
+const isVideo = src => /\.(mp4|webm|mov)(\?|#|$)/i.test(src);
+const isPath = src => /[\/.]/.test(src);
+function applyMedia(m, w, h){
+  const ia = w / h, pa = m.w / PH;
+  m.uniforms.forEach(u => {
+    u.uTex.value = m.tex;
+    u.uCover.value.set(ia > pa ? pa / ia : 1, ia > pa ? 1 : ia / pa);
+    u.uLoaded.value = 1;
+  });
+}
+function makeSlot(scene, m, base){
+  const u = {
+    uTex: { value: null }, uCover: { value: new THREE.Vector2(1, 1) }, uTint: { value: LOOK },
+    uOffset: { value: 0 }, uR: { value: R }, uBend: { value: 1 }, uH: { value: PH }, uGap: { value: 0.1 },
+    uAlpha: { value: 0 }, uTime: { value: 0 }, uLoaded: { value: 0 }, uVel: { value: 0 },
+    uShiftX: { value: 0 }, uScale: { value: 1 }, uDecode: { value: 0 },
+    uBadge: { value: null }, uBadgeRect: { value: new THREE.Vector4() }, uHasBadge: { value: 0 },
+  };
+  [false].forEach(mirror => {   // nur das Bild selbst – keine Spiegelung darunter
+    const mesh = new THREE.Mesh(m.portrait ? geoP : geoL, new THREE.ShaderMaterial({
+      uniforms: { ...u, uMirror: { value: mirror ? 1 : 0 } }, vertexShader: vert, fragmentShader: frag,
+      transparent: true, depthWrite: false, side: mirror ? THREE.BackSide : THREE.FrontSide,
+    }));
+    mesh.frustumCulled = false; mesh.renderOrder = mirror ? 0 : 1;
+    scene.add(mesh);
+  });
+  m.uniforms.push(u);
+  return { m, u, base };
+}
+
+/* ---------- Aufrufe-Badges für Reels ---------- */
+function formatViews(n){
+  const f = (v, d) => v.toLocaleString("de-DE", { maximumFractionDigits: d });
+  if (n >= 1e6) return f(n / 1e6, 1) + " Mio.";
+  if (n >= 1e4) return f(n / 1e3, 0) + " Tsd.";
+  if (n >= 1e3) return f(n / 1e3, 1) + " Tsd.";
+  return f(n, 0);
+}
+function drawBadge(m){
+  const W = 512, H = 120, cv = m.badgeCanvas || (m.badgeCanvas = document.createElement("canvas"));
+  cv.width = W; cv.height = H;
+  const c = cv.getContext("2d");
+  c.clearRect(0, 0, W, H);
+  const text = formatViews(m.views) + " Aufrufe";
+  c.font = "600 46px Inter, system-ui, sans-serif";
+  c.shadowColor = "rgba(0,0,0,0.55)"; c.shadowBlur = 14; c.shadowOffsetY = 3;
+  c.fillStyle = "#fff";
+  c.beginPath(); c.moveTo(22, 40); c.lineTo(22, 80); c.lineTo(54, 60); c.closePath(); c.fill();   // Play-Symbol
+  c.textBaseline = "middle";
+  c.fillText(text, 72, H / 2 + 2, W - 90);
+  if (m.badge) m.badge.needsUpdate = true;
+}
+
+/* ---------- Eine Galerie (ein Thema) ---------- */
+function wrapL(v, L){ return ((v + L / 2) % L + L) % L - L / 2; }
+const bend = 0;   // Galerien als flacher, durchgehender Streifen (1 wäre ein Bogen)
+let started = false, lbOpen = false;
+
+// ci = Nummer des Themas; -1 = Übersicht oben mit allen Themen (Thema wechselt mit dem Bild in der Mitte)
+function createGallery(cfg, ci, sec){
+  const isHero = ci < 0;
+  const themeIds = isHero ? CONFIG.galleries.map((_, i) => i) : [ci];
+  const canvas = sec.querySelector("canvas.gl");
+  const catEl = sec.querySelector(".cat");
+  catEl.innerHTML = themeIds.map(i => {
+    const n = CONFIG.galleries[i].name;
+    return `<div class="cat__item is-down${n.length > 12 ? " is-long" : ""}">${n}</div>`;
+  }).join("");
+  const countEl = sec.querySelector(".gal-count");
+  let currentCat = -1;
+  const setCat = c => {
+    if (c === currentCat) return;
+    const prev = currentCat; currentCat = c;
+    [...catEl.children].forEach((el, j) => {
+      const i = themeIds[j];
+      el.classList.toggle("is-active", i === c);
+      el.classList.toggle("is-up", i !== c && i === prev);
+      el.classList.toggle("is-down", i !== c && i !== prev);
+    });
+    countEl.textContent = pad(c + 1) + " / " + pad(N);
+  };
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 200);
+
+  // Bilder/Videos dieses Themas; Format pro Bild oder pro Thema, sonst zufällig (höchstens 2 gleiche hintereinander)
+  const formats = [];
+  const media = cfg.items.map((entry, i) => {
+    const o = typeof entry === "string" ? { src: entry } : entry;
+    const f = o.format || cfg.format;
+    const tci = o.ci ?? ci;   // Thema dieses Bildes
+    const portrait = f === "portrait" ? true : f === "landscape" ? false
+      : (i >= 2 && formats[i - 1] === formats[i - 2]) ? !formats[i - 1] : Math.random() < 0.5;
+    formats.push(portrait);
+    const src = isPath(o.src) ? o.src : CONFIG.imageUrl(o.src, portrait ? 900 : 1600, portrait ? 1600 : 900);
+    return { src, ci: tci, url: o.url || null, views: o.views ?? null, portrait, w: portrait ? PWP : PW, video: isVideo(src), tex: null, el: null, uniforms: [] };
+  });
+  // Bildband aufbauen – bei wenigen Bildern wird die Reihe wiederholt, damit der Bogen gefüllt ist
+  const slots = [];
+  let L = 0;
+  { let acc = 0, i = 0;
+    while (L < MIN_L || i % media.length !== 0) {
+      const m = media[i % media.length];
+      if (i > 0) acc += slots[i - 1].m.w / 2 + GAP + m.w / 2;
+      slots.push(makeSlot(scene, m, acc));
+      L = acc + m.w / 2 + GAP + media[0].w / 2;
+      i++;
+    } }
+  // Badges für Reels
+  media.forEach(m => {
+    if (m.views == null) return;
+    drawBadge(m);
+    m.badge = new THREE.CanvasTexture(m.badgeCanvas);
+    m.badge.colorSpace = THREE.SRGBColorSpace;
+    const bw = m.w * 0.58, bh = bw * 120 / 512, x0 = 0.05, y0 = 0.035;
+    m.uniforms.forEach(u => { u.uBadge.value = m.badge; u.uHasBadge.value = 1; u.uBadgeRect.value.set(x0, y0, x0 + bw / m.w, y0 + bh / PH); });
+  });
+
+  const g = {
+    ci, cfg, sec, canvas, catEl, media, slots, L, renderer, scene, camera,
+    scroll: -6, target: 0, last: 0, vel: 0, alpha: 0, alphaTarget: 0,
+    autoDir: isHero || ci % 2 ? -1 : 1, holdUntil: 0, visible: isHero, texLoaded: false, dragging: false,
+  };
+
+  // Fotos laden (onDone zählt für den Ladekreis)
+  g.loadTextures = (onDone) => {
+    if (g.texLoaded) return; g.texLoaded = true;
+    media.forEach(m => {
+      if (m.video) return;
+      const done = () => onDone && onDone();
+      loader.load(m.src, tex => {
+        tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+        m.tex = tex; applyMedia(m, tex.image.width, tex.image.height); done();
+      }, undefined, done);
+    });
+  };
+  g.loadVideos = () => media.forEach(m => {
+    if (!m.video) return;
+    if (!m.el) {
+      const v = document.createElement("video");
+      v.crossOrigin = "anonymous";
+      v.muted = true; v.loop = true; v.playsInline = true; v.preload = "auto";
+      v.setAttribute("muted", ""); v.setAttribute("playsinline", "");
+      v.src = m.src;
+      v.addEventListener("loadeddata", () => {
+        m.tex = new THREE.VideoTexture(v);
+        m.tex.colorSpace = THREE.SRGBColorSpace;
+        applyMedia(m, v.videoWidth, v.videoHeight);
+        m.uniforms.forEach(u => (u.uDecode.value = 1));
+      }, { once: true });
+      m.el = v;
+    }
+    m.el.play().catch(() => {});
+  });
+  g.pauseVideos = () => media.forEach(m => m.el && m.el.pause());
+
+  g.panelBottomY = () => {
+    const v = new THREE.Vector3(0, -PH / 2, 0).project(camera);
+    return (1 - v.y) / 2 * sec.clientHeight;
+  };
+  g.panelTopY = () => {
+    const v = new THREE.Vector3(0, PH / 2, 0).project(camera);
+    return (1 - v.y) / 2 * sec.clientHeight;
+  };
+  g.resize = () => {
+    const w = sec.clientWidth, h = sec.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    const fill = w < 640 ? 0.78 : 0.6;               // Anteil der Breite für das Frontbild
+    const chord = 2 * R * Math.sin(PW / (2 * R));
+    const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const d = Math.max(chord / fill / (2 * tanH * camera.aspect), (PH * (isHero ? 2.6 : 1.6)) / (2 * tanH));   // Bild muss in die Höhe passen (oben mit Platz für den Namen)
+    camera.position.set(0, 0.1, d);
+    const camY = isHero ? 0.35 : 0;   // oben: Streifen etwas unter die Mitte, Platz für den Namen darüber
+    camera.position.y = camY;
+    camera.lookAt(0, camY, 0);
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld();
+    const c = new THREE.Vector3(0, 0, 0).project(camera);
+    catEl.style.top = (g.panelTopY() - Math.max(14, h * 0.02)) + "px";   // Name sitzt knapp über der Oberkante der Bilder
+    sec.style.setProperty("--cy", ((1 - c.y) / 2 * h) + "px");
+    const b = new THREE.Vector3(0, -PH / 2, 0).project(camera);
+    sec.style.setProperty("--ch", (((c.y - b.y) / 2) * h + 26) + "px");
+  };
+
+  const nudge = dx => {
+    g.target += dx;
+    if (Math.abs(dx) > 0.0001) g.autoDir = Math.sign(dx);
+    g.holdUntil = performance.now() + 1200;
+  };
+  g.nearestSlot = sc => {
+    let best = 0, bd = Infinity;
+    slots.forEach((sl, i) => { const d = Math.abs(wrapL(sl.base + sc, L)); if (d < bd) { bd = d; best = i; } });
+    return best;
+  };
+  // ein Bild weiter / zurück (Pfeiltasten)
+  g.step = dir => {
+    const j = (g.nearestSlot(g.target) + dir + slots.length) % slots.length;
+    g.target -= wrapL(slots[j].base + g.target, L);
+    g.autoDir = -dir;
+    g.holdUntil = performance.now() + 2500;
+  };
+  // Welches Bild liegt unter dem Mauszeiger? (Strahl gegen Zylinder bzw. Ebene)
+  const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  g.pick = (cx, cy) => {
+    const r = canvas.getBoundingClientRect();
+    ndc.set((cx - r.left) / r.width * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+    raycaster.setFromCamera(ndc, camera);
+    const o = raycaster.ray.origin, d = raycaster.ray.direction;
+    let s, y;
+    if (bend > 0.5) {
+      const oz = o.z + R;
+      const a = d.x * d.x + d.z * d.z, b = 2 * (o.x * d.x + oz * d.z), c = o.x * o.x + oz * oz - R * R;
+      const disc = b * b - 4 * a * c;
+      if (disc < 0) return null;
+      const th = (-b - Math.sqrt(disc)) / (2 * a);
+      s = R * Math.atan2(o.x + d.x * th, oz + d.z * th); y = o.y + d.y * th;
+    } else {
+      const th = -o.z / d.z;
+      s = o.x + d.x * th; y = o.y + d.y * th;
+    }
+    if (Math.abs(y) > PH / 2) return null;
+    return slots.find(sl => Math.abs(wrapL(sl.base + g.scroll, L) - s) < sl.m.w / 2) || null;
+  };
+
+  // Vertikales Scrollen bewegt die Seite. Horizontales Wischen (Trackpad) oder Shift+Mausrad dreht die Galerie.
+  sec.addEventListener("wheel", e => {
+    const dx = e.shiftKey ? e.deltaY : e.deltaX;
+    if (Math.abs(dx) > Math.abs(e.deltaY) || e.shiftKey) { e.preventDefault(); nudge(-dx * 0.006); }
+  }, { passive: false });
+  let lastX = 0, downX = 0, downY = 0;
+  canvas.addEventListener("pointerdown", e => { g.dragging = true; lastX = downX = e.clientX; downY = e.clientY; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointermove", e => {
+    if (g.dragging) { const dx = e.clientX - lastX; lastX = e.clientX; nudge(dx / window.innerWidth * 9); return; }
+    if (e.pointerType === "mouse") canvas.style.cursor = g.pick(e.clientX, e.clientY) ? "zoom-in" : "";
+  });
+  canvas.addEventListener("pointerup", e => {
+    g.dragging = false;
+    if (Math.hypot(e.clientX - downX, e.clientY - downY) > 6) return;   // war ein Wischen, kein Klick
+    const sl = g.pick(e.clientX, e.clientY);
+    if (sl) openLightbox(g, media.indexOf(sl.m));
+  });
+  canvas.addEventListener("pointercancel", () => (g.dragging = false));
+
+  g.update = (dt, t, k, reduce) => {
+    if (started && !g.dragging && !lbOpen && !reduce && performance.now() > g.holdUntil) g.target += g.autoDir * CONFIG.autoSpeed * dt;
+    g.alpha += (g.alphaTarget - g.alpha) * k(3.1);
+    g.scroll += (g.target - g.scroll) * k(4.7);
+    g.vel += (((g.scroll - g.last) / Math.max(dt, 1e-4)) / 60 - g.vel) * k(13); g.last = g.scroll;
+    const v = THREE.MathUtils.clamp(g.vel * 4, -1, 1);
+    slots.forEach(s => {
+      const u = s.u;
+      u.uOffset.value = wrapL(s.base + g.scroll, L);
+      u.uBend.value = bend; u.uTime.value = t; u.uVel.value = v;
+      u.uAlpha.value = g.alpha;
+    });
+    if (started && g.alphaTarget) setCat(slots[g.nearestSlot(g.scroll)].m.ci);   // Thema folgt dem Bild in der Mitte
+    renderer.render(scene, camera);
+  };
+  // sichtbar werden: einblenden, Videos starten
+  g.show = () => {
+    g.alphaTarget = 1;
+    setCat(slots[g.nearestSlot(g.scroll)].m.ci);
+    if (!lbOpen) g.loadVideos();
+  };
+  return g;
+}
+
+const GALS = CONFIG.galleries.map((cfg, ci) => createGallery(cfg, ci, sections[ci]));
+const heroGal = GALS[0];   // erste Galerie (Hochzeiten) – auf ihre Bilder wartet der Ladekreis
+
+/* ---------- Loader (wartet auf die Bilder der ersten Galerie) ---------- */
+const arc = document.getElementById("loaderArc");
+const C = 2 * Math.PI * 48;
+arc.style.strokeDasharray = C; arc.style.strokeDashoffset = C;
+const firstTotal = heroGal.media.filter(m => !m.video).length;
+let firstLoaded = 0;
+function progress(n){
+  const pct = Math.round(n / firstTotal * 100);
+  document.getElementById("loaderPct").textContent = pct + "%";
+  arc.style.strokeDashoffset = C * (1 - n / firstTotal);
+  if (n >= firstTotal) setTimeout(start, 500);
+}
+heroGal.loadTextures(() => progress(++firstLoaded));
+if (!firstTotal) setTimeout(start, 300);
+setTimeout(() => { if (!started) start(); }, 9000); // Fallback
+
+function start(){
+  if (started) return; started = true;
+  document.getElementById("loader").classList.add("is-done");
+  document.body.classList.add("is-ready");
+  GALS.forEach(g => { if (g.visible) setTimeout(g.show, 200); });
+}
+
+/* ---------- Sichtbarkeit: nur sichtbare Galerien zeichnen, weitere Bilder rechtzeitig vorladen ---------- */
+const preIO = new IntersectionObserver(entries => entries.forEach(en => {
+  if (en.isIntersecting) GALS[sections.indexOf(en.target)].loadTextures();
+}), { rootMargin: "100% 0px" });
+const visIO = new IntersectionObserver(entries => entries.forEach(en => {
+  const g = GALS[sections.indexOf(en.target)];
+  g.visible = en.isIntersecting;
+  if (!started) return;
+  if (g.visible) g.show(); else g.pauseVideos();
+}));
+sections.forEach(s => { preIO.observe(s); visIO.observe(s); });
+
+/* ---------- Größe ---------- */
+function resizeAll(){ GALS.forEach(g => g.resize()); }
+window.addEventListener("resize", resizeAll);
+resizeAll();
+document.fonts.ready.then(() => { GALS.forEach(g => g.media.forEach(m => m.badge && drawBadge(m))); });
+
+/* ---------- Tasten ---------- */
+// Galerie, die gerade am meisten im Bild ist
+function focusedGallery(){
+  let best = null, bd = Infinity;
+  GALS.forEach(g => {
+    if (!g.visible) return;
+    const r = g.sec.getBoundingClientRect();
+    const d = Math.abs(r.top + r.height / 2 - innerHeight / 2);
+    if (d < bd) { bd = d; best = g; }
+  });
+  return best;
+}
+window.addEventListener("keydown", e => {
+  if (lbOpen) {   // in der Großansicht: blättern / schließen
+    if (e.key === "ArrowRight") lbGo(1);
+    if (e.key === "ArrowLeft") lbGo(-1);
+    if (e.key === "Escape") closeLightbox();
+    return;
+  }
+  const g = focusedGallery();
+  if (g && e.key === "ArrowRight") g.step(1);
+  if (g && e.key === "ArrowLeft") g.step(-1);
+  if (e.key === "Escape") closeAbout();
+});
+
+/* ---------- Großansicht: Foto / Video groß, alles drumherum dunkel ---------- */
+const lb = document.getElementById("lb"), lbStage = document.getElementById("lbStage");
+const lbTheme = document.getElementById("lbTheme"), lbCount = document.getElementById("lbCount");
+const lbViews = document.getElementById("lbViews"), lbLink = document.getElementById("lbLink");
+let lbGal = null, lbIndex = 0, lbLastFocus = null;
+function lbRender(){
+  const m = lbGal.media[lbIndex];
+  [...lbStage.children].forEach(old => {
+    old.classList.remove("is-in"); old.classList.add("is-out");
+    if (old.tagName === "VIDEO") old.pause();
+    setTimeout(() => old.remove(), 350);
+  });
+  let el;
+  if (m.video) {
+    el = document.createElement("video");
+    el.src = m.src; el.controls = true; el.loop = true; el.playsInline = true; el.autoplay = true;
+    el.addEventListener("loadeddata", () => el.classList.add("is-in"), { once: true });
+    el.play().catch(() => { el.muted = true; el.play().catch(() => {}); });   // Ton, falls der Browser es erlaubt
+  } else {
+    el = document.createElement("img");
+    el.alt = CONFIG.galleries[m.ci].name;
+    el.decoding = "async";
+    el.addEventListener("load", () => el.classList.add("is-in"), { once: true });
+    el.src = m.src;
+  }
+  el.className = "lb__item";
+  lbStage.appendChild(el);
+  if (el.tagName === "IMG" && el.complete) requestAnimationFrame(() => el.classList.add("is-in"));
+  const same = lbGal.media.filter(x => x.ci === m.ci);
+  lbTheme.textContent = CONFIG.galleries[m.ci].name;
+  lbCount.textContent = (same.indexOf(m) + 1) + " / " + same.length;
+  lbViews.textContent = m.views != null ? "▶ " + formatViews(m.views) + " Aufrufe" : "";
+  lbLink.hidden = !m.url; if (m.url) lbLink.href = m.url;
+}
+function openLightbox(g, i){
+  if (i < 0) return;
+  lbGal = g; lbIndex = i; lbOpen = true; lbLastFocus = document.activeElement;
+  lbRender();
+  lb.classList.add("is-open"); lb.setAttribute("aria-hidden", "false");
+  document.documentElement.style.overflow = "hidden";
+  GALS.forEach(x => x.pauseVideos());
+  document.getElementById("lbClose").focus({ preventScroll: true });
+}
+function closeLightbox(){
+  if (!lbOpen) return;
+  lbOpen = false;
+  lb.classList.remove("is-open"); lb.setAttribute("aria-hidden", "true");
+  document.documentElement.style.overflow = "";
+  [...lbStage.querySelectorAll("video")].forEach(v => v.pause());
+  setTimeout(() => { if (!lbOpen) lbStage.innerHTML = ""; }, 500);
+  GALS.forEach(g => { if (g.visible) g.loadVideos(); });
+  lbGal.holdUntil = performance.now() + 1500;
+  if (lbLastFocus) lbLastFocus.focus({ preventScroll: true });
+}
+function lbGo(d){ if (!lbOpen) return; const n = lbGal.media.length; lbIndex = (lbIndex + d + n) % n; lbRender(); }
+document.getElementById("lbClose").onclick = closeLightbox;
+document.getElementById("lbPrev").onclick = () => lbGo(-1);
+document.getElementById("lbNext").onclick = () => lbGo(1);
+lb.addEventListener("click", e => { if (e.target === lb || e.target === lbStage) closeLightbox(); });   // Klick ins Dunkle schließt
+// Wischen auf dem Handy
+let lbTX = null;
+lb.addEventListener("touchstart", e => { lbTX = e.touches[0].clientX; }, { passive: true });
+lb.addEventListener("touchend", e => {
+  if (lbTX == null) return;
+  const dx = e.changedTouches[0].clientX - lbTX; lbTX = null;
+  if (Math.abs(dx) > 50) lbGo(dx < 0 ? 1 : -1);
+});
+
+/* ---------- About ---------- */
+const about = document.getElementById("about");
+function openAbout(){ about.classList.add("is-open"); about.setAttribute("aria-hidden", "false"); }
+function closeAbout(){ about.classList.remove("is-open"); about.setAttribute("aria-hidden", "true"); }
+document.getElementById("aboutLink").onclick = openAbout;
+document.getElementById("aboutClose").onclick = closeAbout;
+document.getElementById("copyMail").onclick = async (e) => {
+  try { await navigator.clipboard.writeText(CONFIG.email); e.target.textContent = "Kopiert ✓"; }
+  catch { location.href = "mailto:" + CONFIG.email; }
+  setTimeout(() => (e.target.textContent = "E-Mail kopieren"), 1600);
+};
+
+/* ---------- Einblend-Animationen ---------- */
+const io = new IntersectionObserver(entries => entries.forEach(en => {
+  if (en.isIntersecting) { en.target.classList.add("is-in"); io.unobserve(en.target); }
+}), { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
+document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+/* ---------- Loop ---------- */
+const clock = new THREE.Clock();
+function tick(){
+  const dt = Math.min(clock.getDelta(), 0.25);
+  const t = clock.elapsedTime;
+  const k = (rate) => 1 - Math.exp(-rate * dt);   // framerate-unabhängiges Dämpfen
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  GALS.forEach(g => { if (g.visible) g.update(dt, t, k, reduce); });
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>
