@@ -73,6 +73,8 @@
   .cat{position:absolute;left:4vw;top:50%;z-index:3;pointer-events:none}
   .cat__item{position:absolute;left:0;bottom:0;font-family:var(--serif);font-size:clamp(28px,3.2vw,52px);line-height:1;color:var(--fg);opacity:0;white-space:nowrap;transition:opacity .6s ease, transform .9s cubic-bezier(.19,1,.22,1)}
   .cat__item.is-active{opacity:1}
+  .theme__link{position:absolute;right:4vw;top:50%;z-index:3;transform:translateY(-100%);font-size:14px;letter-spacing:.04em;color:var(--fg);text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:2px;opacity:.75;transition:opacity .2s}
+  .theme__link:hover{opacity:1}
   .cat__item.is-up{transform:translateY(-40%)}
   .cat__item.is-down{transform:translateY(40%)}
 
@@ -273,6 +275,7 @@
     <span class="lb__count" id="lbCount"></span>
     <span id="lbViews"></span>
     <a class="lb__link" id="lbLink" target="_blank" rel="noopener">Auf Instagram ansehen ↗</a>
+    <a class="lb__link" id="lbTiktok" target="_blank" rel="noopener" hidden>Auf TikTok ansehen ↗</a>
   </div>
 </div>
 
@@ -365,9 +368,11 @@ const CONFIG = {
     // Instagram-Reels: Reel als .mp4 speichern (z. B. "videos/reel-1.mp4"), dazu den Link zum Reel
     // und die Aufrufe eintragen. Klick auf das Video öffnet das Reel auf Instagram.
     // (Platzhalter: Beispielvideos + ausgedachte Zahlen)
-    { name: "Social Media", format: "portrait", items: [
+    { name: "Social Media", format: "portrait",
+      link: { label: "Auf TikTok ansehen", url: "https://www.tiktok.com/@123gold_official/video/7442762631301090582" },
+      items: [
       // Reels
-      // src = Video-Datei, url = Reel auf Instagram, views = Aufrufe (Zahl eintragen, dann wird sie eingeblendet)
+      // src = Video-Datei, url = Reel auf Instagram, tiktok = Video auf TikTok, views = Aufrufe (Zahl eintragen, dann wird sie eingeblendet)
       { src: "videos/reel-1.mp4", url: "https://www.instagram.com/reel/Dd9gQgvyhEW/", views: 18000 },   // 01 Kennenlernen & Laden vorstellen
       { src: "videos/reel-2.mp4", url: "https://www.instagram.com/reel/De2C6g0Snht/", views: 17000 },   // 02 Laden vorstellen – Sandro
     ] },
@@ -419,7 +424,7 @@ const sections = CONFIG.galleries.map(cfg => {
   const sec = document.createElement("section");
   sec.className = "theme"; sec.id = slug(cfg.name);
   sec.setAttribute("aria-label", cfg.name);
-  sec.innerHTML = `<div class="theme__stage"><canvas class="gl"></canvas><div class="cat"></div><div class="gal-count"></div></div>`;
+  sec.innerHTML = `<div class="theme__stage"><canvas class="gl"></canvas><div class="cat"></div><div class="gal-count"></div>${cfg.link ? `<a class="theme__link" href="${cfg.link.url}" target="_blank" rel="noopener">${cfg.link.label} ↗</a>` : ""}</div>`;
   themesEl.appendChild(sec);
   return sec;
 });
@@ -585,7 +590,7 @@ function createGallery(cfg, ci, sec){
       : (i >= 2 && formats[i - 1] === formats[i - 2]) ? !formats[i - 1] : Math.random() < 0.5;
     formats.push(portrait);
     const src = isPath(o.src) ? o.src : CONFIG.imageUrl(o.src, portrait ? 900 : 1600, portrait ? 1600 : 900);
-    return { src, ci: tci, url: o.url || null, views: o.views ?? null, portrait, w: portrait ? PWP : PW, video: isVideo(src), tex: null, el: null, uniforms: [] };
+    return { src, ci: tci, url: o.url || null, tiktok: o.tiktok || null, views: o.views ?? null, portrait, w: portrait ? PWP : PW, video: isVideo(src), tex: null, el: null, uniforms: [] };
   });
   // Bildband aufbauen – bei wenigen Bildern wird die Reihe wiederholt, damit der Bogen gefüllt ist
   const slots = [];
@@ -670,6 +675,8 @@ function createGallery(cfg, ci, sec){
     camera.updateMatrixWorld();
     const c = new THREE.Vector3(0, 0, 0).project(camera);
     catEl.style.top = (g.panelTopY() - Math.max(14, h * 0.02)) + "px";   // Name sitzt knapp über der Oberkante der Bilder
+    const linkEl = sec.querySelector(".theme__link");
+    if (linkEl) linkEl.style.top = catEl.style.top;
     sec.style.setProperty("--cy", ((1 - c.y) / 2 * h) + "px");
     const b = new THREE.Vector3(0, -PH / 2, 0).project(camera);
     sec.style.setProperty("--ch", (((c.y - b.y) / 2) * h + 26) + "px");
@@ -830,7 +837,7 @@ window.addEventListener("keydown", e => {
 /* ---------- Großansicht: Foto / Video groß, alles drumherum dunkel ---------- */
 const lb = document.getElementById("lb"), lbStage = document.getElementById("lbStage");
 const lbTheme = document.getElementById("lbTheme"), lbCount = document.getElementById("lbCount");
-const lbViews = document.getElementById("lbViews"), lbLink = document.getElementById("lbLink");
+const lbViews = document.getElementById("lbViews"), lbLink = document.getElementById("lbLink"), lbTiktok = document.getElementById("lbTiktok");
 let lbGal = null, lbIndex = 0, lbLastFocus = null;
 function lbRender(){
   const m = lbGal.media[lbIndex];
@@ -860,6 +867,7 @@ function lbRender(){
   lbCount.textContent = (same.indexOf(m) + 1) + " / " + same.length;
   lbViews.textContent = m.views != null ? "▶ " + formatViews(m.views) + " Aufrufe" : "";
   lbLink.hidden = !m.url; if (m.url) lbLink.href = m.url;
+  lbTiktok.hidden = !m.tiktok; if (m.tiktok) lbTiktok.href = m.tiktok;
 }
 function openLightbox(g, i){
   if (i < 0) return;
