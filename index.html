@@ -60,6 +60,12 @@
   .marquee__track img{height:34px;width:auto;margin:0 clamp(34px,4vw,60px);opacity:.6;flex:none}
   .marquee__track img.tall{height:52px}
   @keyframes marquee{to{transform:translateX(-50%)}}
+  /* Logo-Balken oben in der Real-Estate-Seite */
+  .clients--inline{position:absolute;top:0;left:0;right:0;min-height:0;padding:clamp(40px,7vh,80px) 0 0;background:none;z-index:4;scroll-snap-align:none;justify-content:flex-start}
+  .clients--inline .eyebrow{margin-bottom:10px}
+  .clients--inline .clients__title{font-size:clamp(26px,2.8vw,42px);margin-bottom:clamp(16px,3vh,28px)}
+  .clients--inline .marquee{margin-bottom:0}
+  .clients--inline .marquee__view{padding:18px 0}
   @media (max-width:640px){
     .marquee__view{padding:18px 0}
     .marquee__track img{height:24px;margin:0 26px} .marquee__track img.tall{height:38px}
@@ -411,7 +417,7 @@ const CONFIG = {
       { src: "img/model/mod-4.jpg" },   // Studio – lila Hose
     ] },
     // Real Estate: deine Fotos gemischt – "portrait" = Hochformat, "landscape" = Querformat (wie das Foto aufgenommen ist)
-    { name: "Real Estate", placeAfter: "kunden", items: [
+    { name: "Real Estate", placeAfter: "kunden", headerFrom: "kunden", items: [
       { src: "img/social/social-1.jpg",     format: "portrait" },
       { src: "img/realestate/re-1.jpg",     format: "landscape" },
       { src: "img/social/social-2.jpg",     format: "portrait" },
@@ -736,11 +742,19 @@ function createGallery(cfg, ci, sec){
     const fill = w < 640 ? 0.78 : 0.6;               // Anteil der Breite für das Frontbild
     const chord = 2 * R * Math.sin(PW / (2 * R));
     const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const d = w < 640
+    let d = w < 640
       ? Math.max(PWP / (0.8 * 2 * tanH * camera.aspect), (PH * 1.25) / (2 * tanH))   // Handy: Hochformat-Bild = 80 % der Bildschirmbreite, Querformate ragen über den Rand
       : Math.max(chord / fill / (2 * tanH * camera.aspect), (PH * (isHero ? 2.6 : 1.6)) / (2 * tanH));   // Bild muss in die Höhe passen (oben mit Platz für den Namen)
+    let camY = isHero ? 0.35 : 0;   // oben: Streifen etwas unter die Mitte, Platz für den Namen darüber
+    const head = sec.querySelector(".clients--inline");
+    if (head) {   // Seite mit Logo-Balken oben: Galerie passt in den Platz darunter (Name + Zähler mit eingerechnet)
+      const top = head.offsetHeight + Math.max(56, h * 0.07), bottom = Math.max(56, h * 0.07);
+      const avail = Math.max(120, h - top - bottom);
+      d = Math.max(d, PH * h / (avail * 2 * tanH));
+      const upp = 2 * d * tanH / h;                       // Welt-Einheiten pro Pixel
+      camY = Math.max(0, (top + avail / 2 - h / 2) * upp);
+    }
     camera.position.set(0, 0.1, d);
-    const camY = isHero ? 0.35 : 0;   // oben: Streifen etwas unter die Mitte, Platz für den Namen darüber
     camera.position.y = camY;
     camera.lookAt(0, camY, 0);
     camera.updateProjectionMatrix();
@@ -839,6 +853,8 @@ function createGallery(cfg, ci, sec){
 
 // Galerien mit placeAfter an eine andere Stelle der Seite setzen (z. B. Real Estate direkt unter „Selbst fotografiert für“)
 CONFIG.galleries.forEach((cfg, ci) => { const ref = cfg.placeAfter && document.getElementById(cfg.placeAfter); if (ref) ref.after(sections[ci]); });
+// headerFrom: einen Block (z. B. Logo-Balken) oben in dieselbe Seite wie die Galerie setzen – kein Riesen-Abstand dazwischen
+CONFIG.galleries.forEach((cfg, ci) => { const head = cfg.headerFrom && document.getElementById(cfg.headerFrom); if (head) { head.classList.add("clients--inline"); sections[ci].querySelector(".theme__stage").appendChild(head); } });
 const GALS = CONFIG.galleries.map((cfg, ci) => createGallery(cfg, ci, sections[ci]));
 const heroGal = GALS[0];   // erste Galerie (Hochzeiten) – auf ihre Bilder wartet der Ladekreis
 
