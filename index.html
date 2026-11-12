@@ -374,7 +374,7 @@ const CONFIG = {
   // format: "portrait" = nur 9:16 (z. B. für Social-Media-Videos), "landscape" = nur 16:9
   look: [1, 1, 1],   // neutral (keine Tönung)
   galleries: [
-    { name: "Hochzeiten", items: [
+    { name: "Hochzeiten", placeAfter: "kunden", headerFrom: "kunden", items: [
       // Hochformat und Querformat möglichst verteilt (nur 2 Querformate)
       { src: "img/hochzeiten/wed-2.jpg",  format: "portrait" },
       { src: "img/hochzeiten/wed-1.jpg",  format: "landscape" },
@@ -417,7 +417,7 @@ const CONFIG = {
       { src: "img/model/mod-4.jpg" },   // Studio – lila Hose
     ] },
     // Real Estate: deine Fotos gemischt – "portrait" = Hochformat, "landscape" = Querformat (wie das Foto aufgenommen ist)
-    { name: "Real Estate", placeAfter: "kunden", headerFrom: "kunden", items: [
+    { name: "Real Estate", placeAfter: "hochzeiten", items: [
       { src: "img/social/social-1.jpg",     format: "portrait" },
       { src: "img/realestate/re-1.jpg",     format: "landscape" },
       { src: "img/social/social-2.jpg",     format: "portrait" },
@@ -647,7 +647,8 @@ function createGallery(cfg, ci, sec){
       el.classList.toggle("is-up", i !== c && i === prev);
       el.classList.toggle("is-down", i !== c && i !== prev);
     });
-    countEl.textContent = pad(c + 1) + " / " + pad(N);
+    const order = [...document.querySelectorAll("section.theme")];   // Zähler nach Reihenfolge auf der Seite
+    countEl.textContent = pad(order.indexOf(sec) + 1) + " / " + pad(order.length);
   };
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
