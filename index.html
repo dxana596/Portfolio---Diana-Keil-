@@ -4,12 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Diana Keil – Portfolio</title>
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500&family=Cormorant+Garamond:wght@300;400&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#ffffff; --fg:#0b0b0b; --muted:#6b6b6b;
+    --bg:#f0ebe2; --fg:#131720; --muted:#7a7468;
+    --gold:#c49a52; --gold-hi:#d4b06a; --gold-lo:#9a7a3d; --night:#090b12;
     --glass:rgba(80,80,80,.36); --glass-btn:rgba(255,255,255,.2);
     --serif:"Bodoni Moda", "Times New Roman", serif;
     --sans:"Inter", system-ui, sans-serif;
@@ -34,9 +36,17 @@
 
   /* ---------- Header ---------- */
   .hero{position:relative;height:100vh;height:100svh;min-height:560px;overflow:hidden;display:flex}
+  /* Logo (DK-Monogramm) */
+  .logo{display:block;color:var(--gold)}
+  .logo svg{display:block;width:100%;height:100%;overflow:visible}
+  .logo text{font-family:"Cormorant Garamond", Georgia, serif;font-weight:300;letter-spacing:.08em}
+  .logo--top{position:absolute;top:12px;left:4vw;z-index:12;width:54px;height:54px}
+  .logo--top circle[stroke]{stroke-width:5} .logo--top text{font-weight:400}
+  .logo--contact{width:110px;height:110px;margin:0 auto 26px;filter:drop-shadow(0 0 14px rgba(196,154,82,.28))}
+  @media (max-width:700px){ .logo--top{width:40px;height:40px;top:10px;left:12px} .logo--contact{width:88px;height:88px} }
   header{position:absolute;top:0;left:0;right:0;z-index:10;text-align:center;padding:22px 16px 0;font-size:14px}
   header h1{font-weight:400;font-size:inherit}
-  header a{text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+  header a{text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:3px;cursor:pointer}
 
   /* ---------- Big title ---------- */
   .title{font-family:var(--serif);font-weight:400;font-size:clamp(64px,8.5vw,150px);line-height:.88;letter-spacing:-.01em}
@@ -79,7 +89,7 @@
   .cat__item.is-up{transform:translateY(-40%)}
   .cat__item.is-down{transform:translateY(40%)}
 
-  .gal-count{position:absolute;z-index:6;left:50%;top:calc(var(--cy,50%) + var(--ch,120px));transform:translateX(-50%);font-size:12px;letter-spacing:.08em;color:var(--muted);font-variant-numeric:tabular-nums;opacity:0;transition:opacity .8s .8s}
+  .gal-count{position:absolute;z-index:6;left:50%;top:calc(var(--cy,50%) + var(--ch,120px));transform:translateX(-50%);font-size:12px;letter-spacing:.08em;color:var(--gold-lo);font-variant-numeric:tabular-nums;opacity:0;transition:opacity .8s .8s}
   body.is-ready .gal-count{opacity:1}
 
   /* ---------- About overlay ---------- */
@@ -99,7 +109,7 @@
   /* ---------- Hero-Extras ---------- */
   .topnav{position:absolute;top:18px;right:4vw;z-index:11;display:flex;gap:18px;font-size:13px}
   .topnav a{text-decoration:none;opacity:.75;transition:opacity .2s}
-  .topnav a:hover{opacity:1}
+  .topnav a:hover{opacity:1;color:var(--gold-lo)}
   .scrollcue{position:absolute;left:4vw;bottom:34px;z-index:11;display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--fg);opacity:0;transition:opacity 1s .8s}
   body.is-ready .scrollcue{opacity:.75}
   .scrollcue__line{position:relative;width:1px;height:40px;background:rgba(0,0,0,.15);overflow:hidden}
@@ -108,7 +118,7 @@
 
   /* ---------- Sections ---------- */
   .wrap{padding:0 4vw}
-  .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-lo)}
   .h2{font-family:var(--serif);font-weight:400;font-size:clamp(44px,6vw,96px);line-height:.88;letter-spacing:-.01em}
   .reveal{opacity:0;transform:translateY(40px);transition:opacity 1s ease, transform 1.2s cubic-bezier(.19,1,.22,1)}
   .reveal.is-in{opacity:1;transform:none}
@@ -155,14 +165,14 @@
   .step h3{font-weight:600;font-size:16px;margin-bottom:8px}
   .step p{font-size:14px;line-height:1.55;color:#444}
 
-  .contact{position:relative;z-index:5;background:#0b0b0b;color:#fff;padding:140px 0 40px;text-align:center;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center}
-  .contact .eyebrow{color:rgba(255,255,255,.55)}
+  .contact{position:relative;z-index:5;background:var(--night);color:#f1ece3;padding:140px 0 40px;text-align:center;min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center}
+  .contact .eyebrow{color:var(--gold)}
   .contact .h2{margin:22px 0 36px;font-size:clamp(34px,4.4vw,70px)}
-  .contact__mail{display:inline-block;font-family:var(--serif);font-size:clamp(22px,2.8vw,40px);text-decoration:none;border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:4px;transition:border-color .3s}
-  .contact__mail:hover{border-color:#fff}
+  .contact__mail{display:inline-block;font-family:var(--serif);font-size:clamp(22px,2.8vw,40px);text-decoration:none;border-bottom:1px solid rgba(196,154,82,.55);padding-bottom:4px;transition:border-color .3s}
+  .contact__mail:hover{border-color:var(--gold-hi)}
   .contact__social{display:flex;gap:22px;justify-content:center;margin-top:34px;font-size:13px}
   .contact__social a{opacity:.7;text-decoration:none}
-  .contact__social a:hover{opacity:1}
+  .contact__social a:hover{opacity:1;color:var(--gold-hi)}
   footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:120px;padding-top:24px;border-top:1px solid rgba(255,255,255,.15);font-size:12px;color:rgba(255,255,255,.5)}
 
   /* ---------- Großansicht (Lightbox) ---------- */
@@ -229,6 +239,7 @@
 </div>
 
 <section class="hero" id="hero">
+  <a class="logo logo--top" href="#hero" aria-label="Diana Keil – nach oben"><svg viewBox="0 0 200 200" fill="none" aria-hidden="true"><defs><linearGradient id="lgTop" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#d4b06a"/><stop offset=".48" stop-color="#c49a52"/><stop offset="1" stop-color="#9a7a3d"/></linearGradient></defs><circle cx="100" cy="100" r="92" stroke="#c49a52" stroke-width=".6" opacity=".22"/><circle cx="100" cy="100" r="80" stroke="url(#lgTop)" stroke-width="2"/><g fill="#c49a52"><circle cx="100" cy="20" r="3.6"/><circle cx="169.3" cy="60" r="3.6"/><circle cx="169.3" cy="140" r="3.6"/><circle cx="100" cy="180" r="3.6"/><circle cx="30.7" cy="140" r="3.6"/><circle cx="30.7" cy="60" r="3.6"/></g><text x="100" y="101" text-anchor="middle" dominant-baseline="central" font-size="74" fill="url(#lgTop)">DK</text></svg></a>
   <header>
     <h1><a id="aboutLink">Diana</a> is a photographer from Germany.</h1>
   </header>
@@ -251,6 +262,7 @@
 <!-- ===================== KONTAKT ===================== -->
 <section class="contact" id="kontakt">
   <div class="wrap">
+    <div class="logo logo--contact reveal" role="img" aria-label="Diana Keil Logo"><svg viewBox="0 0 200 200" fill="none" aria-hidden="true"><defs><linearGradient id="lgContact" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#d4b06a"/><stop offset=".48" stop-color="#c49a52"/><stop offset="1" stop-color="#9a7a3d"/></linearGradient></defs><circle cx="100" cy="100" r="92" stroke="#c49a52" stroke-width=".6" opacity=".22"/><circle cx="100" cy="100" r="80" stroke="url(#lgContact)" stroke-width="2"/><g fill="#c49a52"><circle cx="100" cy="20" r="3.6"/><circle cx="169.3" cy="60" r="3.6"/><circle cx="169.3" cy="140" r="3.6"/><circle cx="100" cy="180" r="3.6"/><circle cx="30.7" cy="140" r="3.6"/><circle cx="30.7" cy="60" r="3.6"/></g><text x="100" y="101" text-anchor="middle" dominant-baseline="central" font-size="74" fill="url(#lgContact)">DK</text></svg></div>
     <div class="eyebrow reveal">(Kontakt)</div>
     <h2 class="h2 reveal">Lern mich und<br>meine Arbeit kennen.</h2>
     <a class="contact__mail reveal" id="contactMail" href="mailto:diana.keil09@gmail.com">diana.keil09@gmail.com</a>
