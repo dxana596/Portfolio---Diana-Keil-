@@ -427,8 +427,8 @@ const CONFIG = {
       { src: "img/realestate/re-4.jpg",     format: "landscape" },
       { src: "img/social/social-6.jpg",     format: "portrait" },
     ] },
-    // Bühne & Konferenz: die bläulichen Bühnen-Fotos, steht auf der Seite direkt unter Real Estate
-    { name: "Bühne & Konferenz", placeAfter: "real-estate", items: [
+    // Events (Production): die bläulichen Bühnen-Fotos, steht auf der Seite direkt unter Real Estate
+    { name: "Events", id: "events-production", placeAfter: "real-estate", items: [
       { src: "img/events/evt-1.jpg",  format: "portrait" },
       { src: "img/events/evt-2.jpg",  format: "landscape" },
       { src: "img/events/evt-5.jpg",  format: "portrait" },    // Bühne – Talk
@@ -438,7 +438,7 @@ const CONFIG = {
     // Instagram-Reels: Reel als .mp4 speichern (z. B. "videos/reel-1.mp4"), dazu den Link zum Reel
     // und die Aufrufe eintragen. Klick auf das Video öffnet das Reel auf Instagram.
     // (Platzhalter: Beispielvideos + ausgedachte Zahlen)
-    { name: "Social Media", placeAfter: "buehne-konferenz", format: "portrait",
+    { name: "Social Media", placeAfter: "events-production", format: "portrait",
       items: [
       // Reels
       // src = Video-Datei, url = Reel auf Instagram, tiktok = Video auf TikTok, views = Aufrufe (Zahl eintragen, dann wird sie eingeblendet)
@@ -511,7 +511,7 @@ const slug = s => s.toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replac
 const themesEl = document.getElementById("themes");
 const sections = CONFIG.galleries.map(cfg => {
   const sec = document.createElement("section");
-  sec.className = "theme"; sec.id = slug(cfg.name);
+  sec.className = "theme"; sec.id = cfg.id || slug(cfg.name);
   sec.setAttribute("aria-label", cfg.name);
   sec.innerHTML = `<div class="theme__stage"><canvas class="gl"></canvas><div class="cat"></div><div class="gal-count"></div>${cfg.link ? `<a class="theme__link" href="${cfg.link.url}" target="_blank" rel="noopener">${cfg.link.label} ↗</a>` : ""}</div>`;
   themesEl.appendChild(sec);
