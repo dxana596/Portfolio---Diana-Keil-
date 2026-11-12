@@ -264,6 +264,16 @@
   }
   @media (prefers-reduced-motion:reduce){ .grain{animation:none} }
 </style>
+<script>
+  // Seite startet immer ganz oben – auch beim Neuladen und wenn ein #Anker in der Adresse steht
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  const toTop = () => { const h = document.documentElement, b = h.style.scrollBehavior; h.style.scrollBehavior = "auto"; window.scrollTo(0, 0); h.style.scrollBehavior = b; };
+  toTop();
+  addEventListener("DOMContentLoaded", toTop);
+  addEventListener("load", () => { toTop(); setTimeout(toTop, 50); });
+  addEventListener("pageshow", e => { if (e.persisted) toTop(); });
+</script>
 </head>
 <body>
 
