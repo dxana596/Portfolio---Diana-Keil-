@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Impressum – Diana Keil</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg:#f0ebe2; --fg:#131720; --muted:#7a7468; --gold:#c49a52; --gold-lo:#9a7a3d; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--fg);font-family:"Inter",system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.65}
+  a{color:inherit}
+  .top{display:flex;align-items:center;justify-content:space-between;padding:18px 4vw}
+  .logo{display:block;width:48px;height:48px}
+  .logo svg{width:100%;height:100%;display:block;overflow:visible}
+  .logo text{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;letter-spacing:.08em}
+  .back{font-size:13px;text-decoration:none;opacity:.75}
+  .back:hover{opacity:1;color:var(--gold-lo)}
+  main{max-width:680px;margin:0 auto;padding:40px 16px 90px}
+  .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-lo)}
+  h1{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;font-size:clamp(44px,7vw,72px);line-height:1;margin:12px 0 44px}
+  h2{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-lo);font-weight:600;margin:38px 0 10px}
+  p{font-size:16px}
+  .muted{color:var(--muted);font-size:14px}
+  hr{border:0;border-top:1px solid rgba(196,154,82,.35);margin:44px 0 0}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="index.html" aria-label="Zur Startseite"><svg viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="#c49a52" stroke-width="5"/><g fill="#c49a52"><circle cx="100" cy="20" r="4"/><circle cx="169.3" cy="60" r="4"/><circle cx="169.3" cy="140" r="4"/><circle cx="100" cy="180" r="4"/><circle cx="30.7" cy="140" r="4"/><circle cx="30.7" cy="60" r="4"/></g><text x="100" y="101" text-anchor="middle" dominant-baseline="central" font-size="74" fill="#c49a52">DK</text></svg></a>
+  <a class="back" href="index.html">← Zurück zum Portfolio</a>
+</header>
+
+<main>
+  <div class="eyebrow">(Rechtliches)</div>
+  <h1>Impressum</h1>
+
+  <h2>Angaben gemäß § 5 DDG</h2>
+  <p>Diana Keil<br>
+     Pagenstraße 21d<br>
+     49545 Tecklenburg<br>
+     Deutschland</p>
+
+  <h2>Kontakt</h2>
+  <p>Telefon: <a href="tel:+4917672250166">0176 72250166</a><br>
+     E-Mail: <a href="mailto:diana.keil09@gmail.com">diana.keil09@gmail.com</a></p>
+
+  <h2>Verantwortlich für den Inhalt</h2>
+  <p>Diana Keil (Anschrift wie oben)</p>
+
+  <h2>Urheberrecht</h2>
+  <p>Alle Fotos und Videos auf dieser Website wurden von Diana Keil erstellt bzw. bearbeitet und sind urheberrechtlich geschützt. Eine Verwendung ist nur mit vorheriger schriftlicher Zustimmung erlaubt. Die gezeigten Firmenlogos gehören den jeweiligen Unternehmen.</p>
+
+  <h2>Haftung für Links</h2>
+  <p>Diese Website enthält Links zu externen Seiten (z.&nbsp;B. Instagram, TikTok). Auf deren Inhalte habe ich keinen Einfluss; dafür ist der jeweilige Anbieter verantwortlich.</p>
+
+  <hr>
+  <p class="muted" style="margin-top:18px">© <span id="y"></span> Diana Keil</p>
+</main>
+<script>document.getElementById("y").textContent = new Date().getFullYear();</script>
+</body>
+</html>
