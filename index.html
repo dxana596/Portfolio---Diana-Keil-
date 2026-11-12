@@ -492,12 +492,15 @@ document.getElementById("introText").textContent = CONFIG.introText;
 // Fotos von dir: liegen übereinander und wechseln sich alle 5 Sekunden sanft ab
 if (CONFIG.portraits.length) {
   const photoEl = document.getElementById("introPhoto");
-  photoEl.innerHTML = `<div class="intro__ring"><svg class="ring" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1"/><g fill="currentColor"><circle cx="100" cy="20" r="2.6"/><circle cx="169.3" cy="60" r="2.6"/><circle cx="169.3" cy="140" r="2.6"/><circle cx="100" cy="180" r="2.6"/><circle cx="30.7" cy="140" r="2.6"/><circle cx="30.7" cy="60" r="2.6"/></g></svg></div>` + CONFIG.portraits.map((p, i) => { const src = p.src || p; return `<img src="${src}" alt="${CONFIG.bigTitle}"${p.pos ? ` style="object-position:${p.pos}"` : ""}${i ? ' aria-hidden="true" loading="lazy"' : ' class="is-on"'}>`; }).join("");
-  const imgs = [...photoEl.children];
+  photoEl.innerHTML = `<div class="intro__ring"><svg class="ring" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1"/><g fill="currentColor"><circle cx="100" cy="20" r="2.6"/><circle cx="169.3" cy="60" r="2.6"/><circle cx="169.3" cy="140" r="2.6"/><circle cx="100" cy="180" r="2.6"/><circle cx="30.7" cy="140" r="2.6"/><circle cx="30.7" cy="60" r="2.6"/></g></svg></div>` + CONFIG.portraits.map((p, i) => { const src = p.src || p; return `<img src="${src}" alt="${CONFIG.bigTitle}"${p.pos ? ` style="object-position:${p.pos}"` : ""}${i ? ' aria-hidden="true"' : ' class="is-on"'}>`; }).join("");
+  const imgs = [...photoEl.querySelectorAll("img")];   // nur die Fotos (nicht der Ring dahinter)
   let pi = 0;
   if (imgs.length > 1) setInterval(() => {
+    let next = (pi + 1) % imgs.length;
+    while (next !== pi && !(imgs[next].complete && imgs[next].naturalWidth)) next = (next + 1) % imgs.length;   // noch nicht geladene Fotos überspringen
+    if (next === pi) return;
     imgs[pi].classList.remove("is-on");
-    pi = (pi + 1) % imgs.length;
+    pi = next;
     imgs[pi].classList.add("is-on");
   }, 5000);
 }
