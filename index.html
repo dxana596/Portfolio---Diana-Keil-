@@ -295,6 +295,9 @@
     <div class="marquee__label">Selbst fotografiert für</div>
     <div class="marquee__view"><div class="marquee__track"></div></div>
   </div>
+</section>
+<!-- hier wird per JS die Galerie mit placeAfter: "kunden" eingesetzt (Real Estate) -->
+<section class="clients clients--edit" id="kunden-bearbeitet" aria-label="Bearbeitet für">
   <div class="marquee marquee--rev reveal" id="mqEdit">
     <div class="marquee__label">Bearbeitet für</div>
     <div class="marquee__view"><div class="marquee__track"></div></div>
@@ -408,7 +411,7 @@ const CONFIG = {
       { src: "img/model/mod-4.jpg" },   // Studio – lila Hose
     ] },
     // Real Estate: deine Fotos gemischt – "portrait" = Hochformat, "landscape" = Querformat (wie das Foto aufgenommen ist)
-    { name: "Real Estate", items: [
+    { name: "Real Estate", placeAfter: "kunden", items: [
       { src: "img/social/social-1.jpg",     format: "portrait" },
       { src: "img/realestate/re-1.jpg",     format: "landscape" },
       { src: "img/social/social-2.jpg",     format: "portrait" },
@@ -834,6 +837,8 @@ function createGallery(cfg, ci, sec){
   return g;
 }
 
+// Galerien mit placeAfter an eine andere Stelle der Seite setzen (z. B. Real Estate direkt unter „Selbst fotografiert für“)
+CONFIG.galleries.forEach((cfg, ci) => { const ref = cfg.placeAfter && document.getElementById(cfg.placeAfter); if (ref) ref.after(sections[ci]); });
 const GALS = CONFIG.galleries.map((cfg, ci) => createGallery(cfg, ci, sections[ci]));
 const heroGal = GALS[0];   // erste Galerie (Hochzeiten) – auf ihre Bilder wartet der Ladekreis
 
