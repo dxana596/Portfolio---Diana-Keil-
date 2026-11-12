@@ -7,7 +7,7 @@
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#f0ebe2; --fg:#131720; --muted:#7a7468;
@@ -59,6 +59,8 @@
   .marquee--rev .marquee__track{animation-direction:reverse}
   .marquee__track img{height:34px;width:auto;margin:0 clamp(34px,4vw,60px);opacity:.6;flex:none}
   .marquee__track img.tall{height:52px}
+  .marquee__text{flex:none;margin:0 clamp(34px,4vw,60px);font-family:var(--serif);font-style:italic;font-weight:500;font-size:40px;line-height:1;letter-spacing:.01em;color:#131720;opacity:.6;white-space:nowrap}
+  .marquee__text em{font-style:italic;color:var(--gold-lo);padding:0 .08em}
   @keyframes marquee{to{transform:translateX(-50%)}}
   /* Logo-Balken oben in der Real-Estate-Seite */
   .clients--inline{position:absolute;top:0;left:0;right:0;min-height:0;padding:clamp(40px,7vh,80px) 0 0;background:none;z-index:4;scroll-snap-align:none;justify-content:flex-start}
@@ -69,6 +71,7 @@
   @media (max-width:640px){
     .marquee__view{padding:18px 0}
     .marquee__track img{height:24px;margin:0 26px} .marquee__track img.tall{height:38px}
+    .marquee__text{font-size:28px;margin:0 26px}
   }
   @media (max-width:700px){ .logo--top{width:40px;height:40px;top:10px;left:12px} .logo--contact{width:88px;height:88px} }
   header{position:absolute;top:0;left:0;right:0;z-index:10;text-align:center;padding:22px 16px 0;font-size:14px}
@@ -472,6 +475,7 @@ const CONFIG = {
     foto: [
       { src: "img/kunden/123gold.png",     name: "123 Gold" },
       { src: "img/kunden/brautvilla.png",  name: "Brautvilla by Peltner", tall: true },
+      { text: "Aylin & Furkan" },           // ohne Logo-Datei: Name als Schriftzug
     ],
     edit: [
       { src: "img/kunden/dertour.png",      name: "DERTOUR" },
@@ -897,7 +901,9 @@ const heroGal = GALS[0];   // erste Galerie (Hochzeiten) – auf ihre Bilder war
 [["mqFoto", CONFIG.clients.foto], ["mqEdit", CONFIG.clients.edit]].forEach(([id, list]) => {
   const box = document.getElementById(id); if (!box) return;
   if (!list.length) { box.hidden = true; return; }
-  const one = list.map(c => `<img src="${c.src}" alt="${c.name}"${c.tall ? ' class="tall"' : ""}>`).join("");
+  const one = list.map(c => c.text
+    ? `<span class="marquee__text" alt="${c.text}">${c.text.replace("&", "<em>&amp;</em>")}</span>`
+    : `<img src="${c.src}" alt="${c.name}"${c.tall ? ' class="tall"' : ""}>`).join("");
   const reps = Math.max(2, Math.ceil(10 / list.length));          // eine Hälfte = mind. ~10 Logos
   const half = Array(reps).fill(one).join("");
   box.querySelector(".marquee__track").innerHTML = half + half.replace(/alt="/g, 'aria-hidden="true" alt="');
