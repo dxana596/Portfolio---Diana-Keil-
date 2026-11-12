@@ -403,7 +403,7 @@ const CONFIG = {
       { src: "img/hochzeiten/wed-10.jpg", format: "portrait" },    // Eda & Altan
       { src: "img/hochzeiten/wed-8.jpg",  format: "portrait" },    // Eda & Altan
     ] },
-    { name: "Events", placeAfter: "model-shootings", items: [
+    { name: "Events", placeAfter: "studio-shooting", items: [
       { src: "img/events/evt-6.jpg",  format: "portrait" },    // Redner mit Mikrofon
       { src: "img/events/evt-9.jpg",  format: "landscape" },   // Saal mit Publikum
       { src: "img/events/evt-7.jpg",  format: "portrait" },    // Panel
@@ -420,12 +420,15 @@ const CONFIG = {
     { name: "Model Shootings", placeAfter: "kunden-bearbeitet", headerFrom: "kunden-bearbeitet", format: "portrait", items: [
       { src: "img/portraits/fn-1.jpg" },
       { src: "img/portraits/fn-4.jpg", format: "landscape" },
-      { src: "img/model/mod-1.jpg" },   // Studio – beiges Outfit mit Tasche
-      { src: "img/model/mod-3.jpg" },   // Studio – roter Anzug
       { src: "img/portraits/fn-3.jpg" },
       { src: "img/portraits/fn-5.jpg", format: "landscape" },
-      { src: "img/model/mod-2.jpg" },   // Studio – Paar
-      { src: "img/model/mod-4.jpg" },   // Studio – lila Hose
+    ] },
+    // Studio Shooting: die 4 Studiofotos (blonder Mann, Frau mit braunen Haaren …), direkt nach Model Shootings
+    { name: "Studio Shooting", placeAfter: "model-shootings", format: "portrait", items: [
+      { src: "img/model/mod-1.jpg" },   // beiges Outfit mit Tasche
+      { src: "img/model/mod-2.jpg" },   // Paar
+      { src: "img/model/mod-3.jpg" },   // roter Anzug
+      { src: "img/model/mod-4.jpg" },   // lila Hose
     ] },
     // Real Estate: deine Fotos gemischt – "portrait" = Hochformat, "landscape" = Querformat (wie das Foto aufgenommen ist)
     { name: "Real Estate", placeAfter: "portraits", items: [
