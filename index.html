@@ -388,13 +388,8 @@ const CONFIG = {
       { src: "img/hochzeiten/wed-8.jpg",  format: "portrait" },    // Eda & Altan
     ] },
     { name: "Events", items: [
-      { src: "img/events/evt-1.jpg",  format: "portrait" },
-      { src: "img/events/evt-2.jpg",  format: "landscape" },
-      { src: "img/events/evt-5.jpg",  format: "portrait" },    // Bühne – Talk
-      { src: "img/events/evt-9.jpg",  format: "landscape" },   // Saal mit Publikum
       { src: "img/events/evt-6.jpg",  format: "portrait" },    // Redner mit Mikrofon
-      { src: "img/events/evt-4.jpg",  format: "landscape" },
-      { src: "img/events/evt-3.jpg",  format: "portrait" },
+      { src: "img/events/evt-9.jpg",  format: "landscape" },   // Saal mit Publikum
       { src: "img/events/evt-7.jpg",  format: "portrait" },    // Panel
       { src: "img/events/evt-10.jpg", format: "landscape" },   // Gäste am Tisch
       { src: "img/events/evt-8.jpg",  format: "portrait" },    // Vortrag vor Roll-up
@@ -428,6 +423,14 @@ const CONFIG = {
       { src: "img/social/social-5.jpg",     format: "portrait" },
       { src: "img/realestate/re-4.jpg",     format: "landscape" },
       { src: "img/social/social-6.jpg",     format: "portrait" },
+    ] },
+    // Bühne & Konferenz: die bläulichen Bühnen-Fotos, steht auf der Seite direkt unter Real Estate
+    { name: "Bühne & Konferenz", placeAfter: "real-estate", items: [
+      { src: "img/events/evt-1.jpg",  format: "portrait" },
+      { src: "img/events/evt-2.jpg",  format: "landscape" },
+      { src: "img/events/evt-5.jpg",  format: "portrait" },    // Bühne – Talk
+      { src: "img/events/evt-4.jpg",  format: "landscape" },
+      { src: "img/events/evt-3.jpg",  format: "portrait" },
     ] },
     // Instagram-Reels: Reel als .mp4 speichern (z. B. "videos/reel-1.mp4"), dazu den Link zum Reel
     // und die Aufrufe eintragen. Klick auf das Video öffnet das Reel auf Instagram.
@@ -494,7 +497,7 @@ if (CONFIG.portraits.length) {
 /* ---------- Galerien: unter der Startseite je ein Abschnitt pro Thema ---------- */
 const N = CONFIG.galleries.length;
 const pad = n => String(n).padStart(2, "0");
-const slug = s => s.toLowerCase().replace(/\s+/g, "-");
+const slug = s => s.toLowerCase().replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue").replace(/ß/g,"ss").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const themesEl = document.getElementById("themes");
 const sections = CONFIG.galleries.map(cfg => {
   const sec = document.createElement("section");
