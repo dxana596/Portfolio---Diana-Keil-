@@ -32,7 +32,10 @@
   .loader__name{font-family:var(--serif);font-size:44px;letter-spacing:-.01em;line-height:1}
   .loader__pct{font-size:13px;margin-top:14px;font-variant-numeric:tabular-nums}
   .loader__arc{position:absolute;left:50%;top:50%;width:260px;height:260px;transform:translate(-50%,-50%) rotate(-90deg)}
-  .loader__arc circle{fill:none;stroke:var(--fg);stroke-width:1.2;stroke-linecap:round;transition:stroke-dashoffset .3s ease}
+  .loader__arc circle{fill:none;stroke:var(--gold);stroke-width:.9;stroke-linecap:round;transition:stroke-dashoffset .3s ease}
+  .loader__arc .loader__track{stroke-opacity:.18}
+  .loader__arc .loader__dot{fill:var(--gold);stroke:none;opacity:.2;transition:opacity .4s ease}
+  .loader__arc .loader__dot.is-on{opacity:1}
 
   /* ---------- Header ---------- */
   .hero{position:relative;height:100vh;height:100lvh;min-height:560px;overflow:hidden;display:flex}
@@ -59,7 +62,16 @@
   /* ---------- Startseite: Foto links, Name + Text rechts ---------- */
   .intro{flex:1;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:6vw;align-items:center;padding:90px 6vw 70px}
   .intro__photo{margin:0;justify-self:end;height:calc(100svh - 200px);max-height:820px;aspect-ratio:2/3;max-width:100%;border-radius:4px;overflow:hidden;background:#efedea;display:grid;place-items:center;color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:0;transform:translateY(30px);transition:opacity 1.2s ease .2s, transform 1.4s cubic-bezier(.19,1,.22,1) .2s}
-  .intro__photo{position:relative}
+  .intro__photo{position:relative;overflow:visible;background:none}
+  .intro__photo img{border-radius:4px}
+  /* Ring mit Punkten (aus dem Logo) hinter dem Foto, dreht sich langsam */
+  .intro__ring{position:absolute;left:50%;top:50%;height:122%;aspect-ratio:1;transform:translate(-50%,-50%);z-index:-1;color:var(--gold);opacity:.55;pointer-events:none}
+  .intro__ring .ring{width:100%;height:100%;animation:ringspin 90s linear infinite}
+  @keyframes ringspin{to{transform:rotate(360deg)}}
+  /* kleiner Ring vor den Galerie-Namen */
+  .cat__ring{display:inline-block;width:.7em;height:.7em;margin-right:.32em;vertical-align:.06em;color:var(--gold)}
+  .cat__ring .ring{width:100%;height:100%;display:block}
+  .cat__ring .ring > circle{stroke-width:6} .cat__ring .ring g circle{r:9px}
   .intro__photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 1.8s ease}
   .intro__photo img.is-on{opacity:1}
   body.is-ready .intro__photo{opacity:1;transform:none}
@@ -232,7 +244,7 @@
 <body>
 
 <div class="loader" id="loader">
-  <svg class="loader__arc" viewBox="0 0 100 100"><circle id="loaderArc" cx="50" cy="50" r="48"/></svg>
+  <svg class="loader__arc" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" class="loader__track"/><circle id="loaderArc" cx="50" cy="50" r="48"/><circle class="loader__dot" cx="98.00" cy="50.00" r="1.6"/><circle class="loader__dot" cx="74.00" cy="91.57" r="1.6"/><circle class="loader__dot" cx="26.00" cy="91.57" r="1.6"/><circle class="loader__dot" cx="2.00" cy="50.00" r="1.6"/><circle class="loader__dot" cx="26.00" cy="8.43" r="1.6"/><circle class="loader__dot" cx="74.00" cy="8.43" r="1.6"/></svg>
   <div class="loader__inner">
     <div class="loader__name" id="loaderName">Diana</div>
     <div class="loader__pct" id="loaderPct">0%</div>
@@ -419,7 +431,7 @@ document.getElementById("introText").textContent = CONFIG.introText;
 // Fotos von dir: liegen übereinander und wechseln sich alle 5 Sekunden sanft ab
 if (CONFIG.portraits.length) {
   const photoEl = document.getElementById("introPhoto");
-  photoEl.innerHTML = CONFIG.portraits.map((src, i) => `<img src="${src}" alt="${CONFIG.bigTitle}"${i ? ' aria-hidden="true"' : ' class="is-on"'}>`).join("");
+  photoEl.innerHTML = `<div class="intro__ring"><svg class="ring" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1"/><g fill="currentColor"><circle cx="100" cy="20" r="2.6"/><circle cx="169.3" cy="60" r="2.6"/><circle cx="169.3" cy="140" r="2.6"/><circle cx="100" cy="180" r="2.6"/><circle cx="30.7" cy="140" r="2.6"/><circle cx="30.7" cy="60" r="2.6"/></g></svg></div>` + CONFIG.portraits.map((src, i) => `<img src="${src}" alt="${CONFIG.bigTitle}"${i ? ' aria-hidden="true"' : ' class="is-on"'}>`).join("");
   const imgs = [...photoEl.children];
   let pi = 0;
   if (imgs.length > 1) setInterval(() => {
@@ -572,7 +584,7 @@ function createGallery(cfg, ci, sec){
   const catEl = sec.querySelector(".cat");
   catEl.innerHTML = themeIds.map(i => {
     const n = CONFIG.galleries[i].name;
-    return `<div class="cat__item is-down${n.length > 12 ? " is-long" : ""}">${n}</div>`;
+    return `<div class="cat__item is-down${n.length > 12 ? " is-long" : ""}"><span class="cat__ring"><svg class="ring" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1"/><g fill="currentColor"><circle cx="100" cy="20" r="2.6"/><circle cx="169.3" cy="60" r="2.6"/><circle cx="169.3" cy="140" r="2.6"/><circle cx="100" cy="180" r="2.6"/><circle cx="30.7" cy="140" r="2.6"/><circle cx="30.7" cy="60" r="2.6"/></g></svg></span>${n}</div>`;
   }).join("");
   const countEl = sec.querySelector(".gal-count");
   let currentCat = -1;
@@ -794,6 +806,7 @@ function progress(n){
   const pct = Math.round(n / firstTotal * 100);
   document.getElementById("loaderPct").textContent = pct + "%";
   arc.style.strokeDashoffset = C * (1 - n / firstTotal);
+  document.querySelectorAll(".loader__dot").forEach((d, i) => d.classList.toggle("is-on", n / firstTotal >= i / 6));
   if (n >= firstTotal) setTimeout(start, 500);
 }
 heroGal.loadTextures(() => progress(++firstLoaded));
