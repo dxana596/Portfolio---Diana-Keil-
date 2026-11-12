@@ -520,7 +520,10 @@ const sections = CONFIG.galleries.map(cfg => {
 
 /* ---------- Three.js: gemeinsame Bausteine ---------- */
 const PH = 2.25, GAP = 0.12;
-const PW = PH * 16 / 9, PWP = PH * 9 / 16;   // Breite 16:9 bzw. 9:16
+// Handy: Querformate als Quadrat (1:1), sonst 16:9. Beim Wechsel Handy <-> größer wird die Seite neu geladen.
+const PHONE_MQ = matchMedia("(max-width:639px)");
+PHONE_MQ.addEventListener("change", () => location.reload());
+const PW = PHONE_MQ.matches ? PH : PH * 16 / 9, PWP = PH * 9 / 16;   // Breite Querformat bzw. Hochformat 9:16
 const R = PW * 0.8;                          // Zylinderradius (kleiner = stärker gekrümmt)
 const MIN_L = 34;                            // Mindestlänge, damit der Streifen auch auf breiten Bildschirmen immer gefüllt ist
 
