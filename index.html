@@ -749,22 +749,37 @@ function createGallery(cfg, ci, sec){
   g.loadVideos = () => media.forEach(m => {
     if (!m.video) return;
     if (!m.el) {
+      // 1) sofort ein Standbild zeigen (videos/reel-x.jpg) – damit auf dem Handy nie ein leeres Feld zu sehen ist
+      const poster = m.src.replace(/\.(mp4|webm|mov)$/i, ".jpg");
+      loader.load(poster, tex => {
+        if (m.playing) return;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        m.tex = tex; applyMedia(m, tex.image.width, tex.image.height);
+        m.uniforms.forEach(u => (u.uDecode.value = 0));
+      });
+      // 2) Video: unsichtbar in die Seite hängen (iPhone spielt sonst oft nicht ab)
       const v = document.createElement("video");
       v.crossOrigin = "anonymous";
-      v.muted = true; v.loop = true; v.playsInline = true; v.preload = "auto";
-      v.setAttribute("muted", ""); v.setAttribute("playsinline", "");
+      v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true; v.preload = "auto";
+      v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("webkit-playsinline", "");
+      v.style.cssText = "position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;z-index:-1";
       v.src = m.src;
-      v.addEventListener("loadeddata", () => {
+      document.body.appendChild(v);
+      // 3) erst wenn das Video wirklich läuft, vom Standbild aufs Video umschalten
+      v.addEventListener("playing", () => {
+        if (m.playing) return;
+        m.playing = true;
         m.tex = new THREE.VideoTexture(v);
         m.tex.colorSpace = THREE.SRGBColorSpace;
         applyMedia(m, v.videoWidth, v.videoHeight);
         m.uniforms.forEach(u => (u.uDecode.value = 1));
-      }, { once: true });
+      });
       m.el = v;
     }
+    delete m.el.dataset.hold;
     m.el.play().catch(() => {});
   });
-  g.pauseVideos = () => media.forEach(m => m.el && m.el.pause());
+  g.pauseVideos = () => media.forEach(m => { if (m.el) { m.el.dataset.hold = "1"; m.el.pause(); } });
 
   g.panelBottomY = () => {
     const v = new THREE.Vector3(0, -PH / 2, 0).project(camera);
@@ -956,6 +971,10 @@ sections.forEach(s => { preIO.observe(s); visIO.observe(s); });
 
 /* ---------- Größe ---------- */
 function resizeAll(){ GALS.forEach(g => g.resize()); }
+// iPhone (z. B. im Stromsparmodus) startet Videos oft erst nach einer Berührung – dann alle sichtbaren Videos anstoßen
+["touchstart", "pointerdown"].forEach(ev => addEventListener(ev, () => {
+  document.querySelectorAll("video").forEach(v => { if (v.paused && v.muted && !v.dataset.hold) v.play().catch(() => {}); });
+}, { passive: true }));
 // Logos/Schriften laden später – danach Größen neu berechnen, damit nichts überlappt
 window.addEventListener("load", () => resizeAll());
 if (document.fonts) document.fonts.ready.then(() => resizeAll());
