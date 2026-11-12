@@ -6,18 +6,19 @@
 <title>Diana Keil – Portfolio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#ffffff; --fg:#0b0b0b; --muted:#6b6b6b;
     --glass:rgba(80,80,80,.36); --glass-btn:rgba(255,255,255,.2);
-    --serif:"Cormorant Garamond", "Times New Roman", serif;
+    --serif:"Bodoni Moda", "Times New Roman", serif;
     --sans:"Inter", system-ui, sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   /* Seiten-Scroll: jede Galerie ist eine eigene Bildschirmseite, beim Scrollen rastet die Seite ein */
   html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
   .hero,.theme,.contact{scroll-snap-align:start;scroll-snap-stop:always}
+  .title,.cat__item,.h2,.contact__mail,.lb__theme,.loader__name,.about h2,.svc2__title,.step__n{font-variation-settings:"opsz" 48}
   body{overflow-x:hidden;background:var(--bg);color:var(--fg);font-family:var(--sans);-webkit-font-smoothing:antialiased}
   a{color:inherit}
   .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
