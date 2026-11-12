@@ -47,19 +47,22 @@
   .logo--top{position:absolute;top:12px;left:4vw;z-index:12;width:54px;height:54px}
   .logo--top circle[stroke]{stroke-width:5} .logo--top text{font-weight:400}
   .logo--contact{width:110px;height:110px;margin:0 auto 26px;filter:drop-shadow(0 0 14px rgba(196,154,82,.28))}
-  /* Kunden: eigene ruhige Seite vor dem Kontakt */
-  .clients{position:relative;z-index:5;background:var(--bg);min-height:100vh;min-height:100lvh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 6vw;text-align:center;scroll-snap-align:start;scroll-snap-stop:always}
+  /* Kunden: zwei durchlaufende Logo-Balken (fotografiert / bearbeitet) */
+  .clients{position:relative;z-index:5;background:var(--bg);min-height:100vh;min-height:100lvh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 0;text-align:center;scroll-snap-align:start;scroll-snap-stop:always}
   .clients .eyebrow{margin-bottom:18px}
-  .clients__title{font-family:var(--serif);font-weight:500;font-size:clamp(34px,4.4vw,64px);line-height:1;margin-bottom:clamp(48px,7vh,90px)}
-  .clients__grid{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;row-gap:clamp(40px,6vh,70px);width:min(980px,100%)}
-  .clients__grid li{list-style:none;display:flex;align-items:center;justify-content:center;height:90px;width:33.33%;padding:0 clamp(14px,3vw,40px)}
-  .clients__grid img{max-width:min(220px,100%);max-height:52px;width:auto;height:auto;opacity:.55;transition:opacity .3s}
-  .clients__grid img.tall{max-height:84px}
-  .clients__grid li:hover img{opacity:.9}
+  .clients__title{font-family:var(--serif);font-weight:500;font-size:clamp(34px,4.4vw,64px);line-height:1;margin-bottom:clamp(40px,7vh,80px)}
+  .marquee{width:100%;margin-bottom:clamp(36px,6vh,64px)}
+  .marquee:last-child{margin-bottom:0}
+  .marquee__label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-lo);margin-bottom:18px}
+  .marquee__view{overflow:hidden;border-top:1px solid rgba(196,154,82,.3);border-bottom:1px solid rgba(196,154,82,.3);padding:26px 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+  .marquee__track{display:flex;align-items:center;width:max-content;animation:marquee 40s linear infinite}
+  .marquee--rev .marquee__track{animation-direction:reverse}
+  .marquee__track img{height:34px;width:auto;margin:0 clamp(34px,4vw,60px);opacity:.6;flex:none}
+  .marquee__track img.tall{height:52px}
+  @keyframes marquee{to{transform:translateX(-50%)}}
   @media (max-width:640px){
-    .clients__grid{row-gap:30px}
-    .clients__grid li{height:70px;width:50%}
-    .clients__grid img{max-height:36px} .clients__grid img.tall{max-height:62px}
+    .marquee__view{padding:18px 0}
+    .marquee__track img{height:24px;margin:0 26px} .marquee__track img.tall{height:38px}
   }
   @media (max-width:700px){ .logo--top{width:40px;height:40px;top:10px;left:12px} .logo--contact{width:88px;height:88px} }
   header{position:absolute;top:0;left:0;right:0;z-index:10;text-align:center;padding:22px 16px 0;font-size:14px}
@@ -284,16 +287,18 @@
 <div id="themes"></div>
 
 <!-- ===================== KUNDEN ===================== -->
+<!-- Logos werden per JS aus CONFIG.clients in die Balken gesetzt -->
 <section class="clients" id="kunden" aria-label="Kunden">
   <div class="eyebrow reveal">(Kunden)</div>
   <h2 class="clients__title reveal">Gearbeitet mit</h2>
-  <ul class="clients__grid reveal">
-      <li><img src="img/kunden/123gold.png" alt="123 Gold" loading="lazy"></li>
-      <li><img src="img/kunden/dertour.png" alt="DERTOUR" loading="lazy"></li>
-      <li><img src="img/kunden/brautvilla.png" alt="Brautvilla by Peltner" loading="lazy" class="tall"></li>
-      <li><img src="img/kunden/baf-fashion.png" alt="BAF Fashion" loading="lazy" class="tall"></li>
-      <li><img src="img/kunden/kayl-visuals.png" alt="KAYL Visuals" loading="lazy" class="tall"></li>
-  </ul>
+  <div class="marquee reveal" id="mqFoto">
+    <div class="marquee__label">Selbst fotografiert für</div>
+    <div class="marquee__view"><div class="marquee__track"></div></div>
+  </div>
+  <div class="marquee marquee--rev reveal" id="mqEdit">
+    <div class="marquee__label">Bearbeitet für</div>
+    <div class="marquee__view"><div class="marquee__track"></div></div>
+  </div>
 </section>
 
 <!-- ===================== KONTAKT ===================== -->
@@ -432,6 +437,18 @@ const CONFIG = {
   // Startseite: Fotos von dir (wechseln sich sanft ab; leere Liste = Platzhalter) und kleiner Text unter dem Namen
   portraits: ["img/about/diana.jpg", "img/about/diana-2.jpg"],
   introText: "Hi, ich bin Diana – ich halte Momente fest, die bleiben. Ich fotografiere und filme Hochzeiten, Events und Shootings. Scroll weiter und schau dir meine Arbeiten an.",
+  // Kunden-Logos (Dateien in img/kunden). "foto" = selbst fotografiert, "edit" = bearbeitet
+  clients: {
+    foto: [
+      { src: "img/kunden/123gold.png",     name: "123 Gold" },
+      { src: "img/kunden/brautvilla.png",  name: "Brautvilla by Peltner", tall: true },
+      { src: "img/kunden/baf-fashion.png", name: "BAF Fashion", tall: true },
+    ],
+    edit: [
+      { src: "img/kunden/dertour.png",      name: "DERTOUR" },
+      { src: "img/kunden/kayl-visuals.png", name: "KAYL Visuals", tall: true },
+    ],
+  },
   autoSpeed: 0.45,   // Geschwindigkeit der automatischen Drehung (0 = aus)
 };
 
@@ -819,6 +836,16 @@ function createGallery(cfg, ci, sec){
 
 const GALS = CONFIG.galleries.map((cfg, ci) => createGallery(cfg, ci, sections[ci]));
 const heroGal = GALS[0];   // erste Galerie (Hochzeiten) – auf ihre Bilder wartet der Ladekreis
+
+/* ---------- Kunden-Balken füllen (Logos so oft wiederholen, dass der Balken voll ist) ---------- */
+[["mqFoto", CONFIG.clients.foto], ["mqEdit", CONFIG.clients.edit]].forEach(([id, list]) => {
+  const box = document.getElementById(id); if (!box) return;
+  if (!list.length) { box.hidden = true; return; }
+  const one = list.map(c => `<img src="${c.src}" alt="${c.name}"${c.tall ? ' class="tall"' : ""}>`).join("");
+  const reps = Math.max(2, Math.ceil(10 / list.length));          // eine Hälfte = mind. ~10 Logos
+  const half = Array(reps).fill(one).join("");
+  box.querySelector(".marquee__track").innerHTML = half + half.replace(/alt="/g, 'aria-hidden="true" alt="');
+});
 
 /* ---------- Loader (wartet auf die Bilder der ersten Galerie) ---------- */
 const arc = document.getElementById("loaderArc");
