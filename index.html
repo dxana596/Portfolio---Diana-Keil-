@@ -268,13 +268,15 @@
   @media (prefers-reduced-motion:reduce){ .grain{animation:none} }
   /* ---------- Bewegter Hintergrund: weiches Gold-Licht, schwebende Punkte, großer Ring ---------- */
   .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-  .bgfx__blob{position:absolute;border-radius:50%;will-change:transform}
-  .bgfx__blob--1{width:70vmax;height:70vmax;left:-20vmax;top:-25vmax;background:radial-gradient(circle,rgba(212,176,106,.38),rgba(212,176,106,0) 65%);animation:blob1 26s ease-in-out infinite alternate}
-  .bgfx__blob--2{width:60vmax;height:60vmax;right:-22vmax;top:20vh;background:radial-gradient(circle,rgba(196,154,82,.28),rgba(196,154,82,0) 65%);animation:blob2 34s ease-in-out infinite alternate}
-  .bgfx__blob--3{width:55vmax;height:55vmax;left:15vw;bottom:-30vmax;background:radial-gradient(circle,rgba(255,250,240,.75),rgba(255,250,240,0) 65%);animation:blob3 30s ease-in-out infinite alternate}
-  @keyframes blob1{to{transform:translate(28vw,22vh) scale(1.15)}}
-  @keyframes blob2{to{transform:translate(-30vw,-18vh) scale(.9)}}
-  @keyframes blob3{to{transform:translate(20vw,-30vh) scale(1.2)}}
+  /* Gold-Licht scrollt mit der Seite mit (über die ganze Länge verteilt) */
+  body{position:relative}
+  .bgglow{position:absolute;left:0;top:0;width:100%;z-index:0;pointer-events:none;overflow:hidden}
+  .bgglow__blob{position:absolute;border-radius:50%;will-change:transform;animation:blobA 28s ease-in-out infinite alternate}
+  .bgglow__blob:nth-child(3n+2){animation-name:blobB;animation-duration:34s}
+  .bgglow__blob:nth-child(3n){animation-name:blobC;animation-duration:30s}
+  @keyframes blobA{to{transform:translate(22vw,14vh) scale(1.15)}}
+  @keyframes blobB{to{transform:translate(-24vw,-12vh) scale(.9)}}
+  @keyframes blobC{to{transform:translate(14vw,-18vh) scale(1.2)}}
   .bgfx__dot{position:absolute;bottom:-12px;border-radius:50%;background:var(--gold);opacity:0;animation:dotrise linear infinite;will-change:transform,opacity}
   @keyframes dotrise{0%{transform:translate(0,0);opacity:0}12%{opacity:var(--o,.5)}85%{opacity:var(--o,.5)}100%{transform:translate(var(--dx,20px),-110vh);opacity:0}}
   .hero{z-index:5}
@@ -292,8 +294,8 @@
 </script>
 </head>
 <body>
+<div class="bgglow" id="bgglow" aria-hidden="true"></div>
 <div class="bgfx" id="bgfx" aria-hidden="true">
-  <div class="bgfx__blob bgfx__blob--1"></div><div class="bgfx__blob bgfx__blob--2"></div><div class="bgfx__blob bgfx__blob--3"></div>
 </div>
 <script>
   // schwebende Gold-Punkte im Hintergrund
@@ -302,6 +304,16 @@
       const s = 2 + Math.random() * 4;
       d.style.cssText = `left:${Math.random()*100}%;width:${s}px;height:${s}px;animation-duration:${14+Math.random()*16}s;animation-delay:${-Math.random()*30}s;--dx:${(Math.random()-.5)*120}px;--o:${.25+Math.random()*.45}`;
       box.appendChild(d); } })();
+  // Gold-Licht: pro Bildschirmhöhe ein paar weiche Lichtflecken, die mit der Seite mitscrollen
+  function buildGlow(){ const g = document.getElementById("bgglow"); if (!g) return;
+    const H = document.documentElement.scrollHeight, vh = innerHeight; g.style.height = H + "px";
+    if (g.dataset.h == H) return; g.dataset.h = H; g.innerHTML = "";
+    const cols = ["rgba(212,176,106,.36)", "rgba(196,154,82,.26)", "rgba(255,250,240,.75)"];
+    for (let y = 0, i = 0; y < H; y += vh * 0.6, i++) { const b = document.createElement("i"); b.className = "bgglow__blob";
+      const size = (55 + Math.random() * 25) * Math.max(innerWidth, vh) / 100;
+      b.style.cssText = `width:${size}px;height:${size}px;top:${y - size/2 + Math.random()*vh*.4}px;left:${(i % 2 ? 55 : -15) + Math.random()*25}%;background:radial-gradient(circle,${cols[i % 3]},transparent 65%);animation-delay:${-Math.random()*30}s`;
+      g.appendChild(b); } }
+  addEventListener("load", buildGlow); addEventListener("resize", () => { clearTimeout(window.__gT); window.__gT = setTimeout(buildGlow, 300); });
 </script>
 
 <div class="loader" id="loader">
