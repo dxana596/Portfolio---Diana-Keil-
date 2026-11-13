@@ -275,8 +275,6 @@
   @keyframes blob1{to{transform:translate(28vw,22vh) scale(1.15)}}
   @keyframes blob2{to{transform:translate(-30vw,-18vh) scale(.9)}}
   @keyframes blob3{to{transform:translate(20vw,-30vh) scale(1.2)}}
-  .bgfx__ring{position:absolute;right:-18vmin;top:8vh;width:70vmin;height:70vmin;color:var(--gold);opacity:.16;animation:ringspin 120s linear infinite}
-  .bgfx__ring svg{width:100%;height:100%;display:block}
   .bgfx__dot{position:absolute;bottom:-12px;border-radius:50%;background:var(--gold);opacity:0;animation:dotrise linear infinite;will-change:transform,opacity}
   @keyframes dotrise{0%{transform:translate(0,0);opacity:0}12%{opacity:var(--o,.5)}85%{opacity:var(--o,.5)}100%{transform:translate(var(--dx,20px),-110vh);opacity:0}}
   .hero{z-index:5}
@@ -296,7 +294,6 @@
 <body>
 <div class="bgfx" id="bgfx" aria-hidden="true">
   <div class="bgfx__blob bgfx__blob--1"></div><div class="bgfx__blob bgfx__blob--2"></div><div class="bgfx__blob bgfx__blob--3"></div>
-  <div class="bgfx__ring"><svg viewBox="0 0 200 200" fill="none"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width=".8"/><g fill="currentColor"><circle cx="100" cy="20" r="2.4"/><circle cx="169.3" cy="60" r="2.4"/><circle cx="169.3" cy="140" r="2.4"/><circle cx="100" cy="180" r="2.4"/><circle cx="30.7" cy="140" r="2.4"/><circle cx="30.7" cy="60" r="2.4"/></g></svg></div>
 </div>
 <script>
   // schwebende Gold-Punkte im Hintergrund
