@@ -269,13 +269,27 @@
   /* ---------- Bewegter Hintergrund: Seiden-Linien + Gold-Punkte (Canvas), Kamera-Elemente in den Abschnitten ---------- */
   .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
   .bgfx canvas{display:block;width:100%;height:100%}
-  .deco{position:absolute;z-index:0;pointer-events:none;color:var(--gold);opacity:.38}
-  .deco svg{display:block;width:100%;height:100%;overflow:visible}
-  .deco--spin svg{animation:decoSpin 60s linear infinite}
-  .deco--pulse svg{animation:decoPulse 6s ease-in-out infinite}
-  @keyframes decoSpin{to{transform:rotate(360deg)}}
-  @keyframes decoPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.94);opacity:.55}}
-  @media (prefers-reduced-motion:reduce){.deco svg{animation:none}}
+  /* Kamera-Sucher: Fokus-Ecken als Rahmen um jede Galerie (Name + Bilder + Zähler) */
+  .vf{position:absolute;z-index:3;left:2vw;right:2vw;top:var(--vft,10%);height:var(--vfh,80%);pointer-events:none;opacity:0;transition:opacity 1s .6s}
+  body.is-ready .vf{opacity:1}
+  .vf i{position:absolute;width:clamp(22px,2.6vw,40px);height:clamp(22px,2.6vw,40px);border:0 solid var(--gold);transition:transform .9s cubic-bezier(.19,1,.22,1)}
+  .vf i:nth-child(1){top:0;left:0;border-top-width:1.5px;border-left-width:1.5px}
+  .vf i:nth-child(2){top:0;right:0;border-top-width:1.5px;border-right-width:1.5px}
+  .vf i:nth-child(3){bottom:0;left:0;border-bottom-width:1.5px;border-left-width:1.5px}
+  .vf i:nth-child(4){bottom:0;right:0;border-bottom-width:1.5px;border-right-width:1.5px}
+  /* "Scharfstellen": Ecken ziehen sich beim Ankommen kurz zusammen */
+  .vf.is-focus i:nth-child(1){animation:vf1 1.1s cubic-bezier(.19,1,.22,1)}
+  .vf.is-focus i:nth-child(2){animation:vf2 1.1s cubic-bezier(.19,1,.22,1)}
+  .vf.is-focus i:nth-child(3){animation:vf3 1.1s cubic-bezier(.19,1,.22,1)}
+  .vf.is-focus i:nth-child(4){animation:vf4 1.1s cubic-bezier(.19,1,.22,1)}
+  @keyframes vf1{0%{transform:translate(-14px,-14px);opacity:0}100%{transform:none;opacity:1}}
+  @keyframes vf2{0%{transform:translate(14px,-14px);opacity:0}100%{transform:none;opacity:1}}
+  @keyframes vf3{0%{transform:translate(-14px,14px);opacity:0}100%{transform:none;opacity:1}}
+  @keyframes vf4{0%{transform:translate(14px,14px);opacity:0}100%{transform:none;opacity:1}}
+  .vf b{position:absolute;top:0;right:clamp(30px,3.4vw,52px);transform:translateY(-50%);font:500 10px var(--sans);letter-spacing:.14em;color:var(--gold-lo);display:flex;align-items:center;gap:6px}
+  .vf b::before{content:"";width:6px;height:6px;border-radius:50%;background:#c0563f;animation:rec 1.6s steps(1) infinite}
+  @keyframes rec{50%{opacity:0}}
+  @media (prefers-reduced-motion:reduce){.vf.is-focus i{animation:none}.vf b::before{animation:none}}
   .hero{z-index:5}
 
   /* Eigener Cursor: Gold-Punkt + nachziehender Ring (nur Maus, nicht Handy) */
@@ -400,34 +414,6 @@
     requestAnimationFrame(frame);
   })();
 
-  // Kamera-Elemente: zarte Gold-Linien (Fokus-Ecken, Blende, Raster) in den Abschnitten – scrollen mit der Seite
-  addEventListener("load", function(){
-    const S = (inner) => `<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke">${inner}</svg>`;
-    const blades = Array.from({length:6}, (_,i) => { const a = i*Math.PI/3, b = a + 1.25;
-      return `<line x1="${50+46*Math.cos(a)}" y1="${50+46*Math.sin(a)}" x2="${50+18*Math.cos(b)}" y2="${50+18*Math.sin(b)}"/>`; }).join("");
-    const M = {
-      focus: [S(`<path d="M0 18V0h18M82 0h18v18M100 82v18H82M18 100H0V82"/><path d="M50 44v12M44 50h12"/>`), "pulse"],
-      aperture: [S(`<circle cx="50" cy="50" r="46"/>${blades}`), "spin"],
-      grid: [S(`<rect x="0" y="0" width="100" height="100" stroke-dasharray="2 3"/><path d="M33.3 0v100M66.6 0v100M0 33.3h100M0 66.6h100"/><circle cx="33.3" cy="33.3" r="2.5" fill="currentColor"/><circle cx="66.6" cy="66.6" r="2.5" fill="currentColor"/>`), ""],
-      af: [S(`<rect x="25" y="25" width="50" height="50"/>${[15,50,85].flatMap(x=>[15,50,85].map(y=>`<circle cx="${x}" cy="${y}" r="1.6" fill="currentColor"/>`)).join("")}`), "pulse"],
-    };
-    const kinds = Object.keys(M), small = innerWidth < 640;
-    const secs = [document.getElementById("hero"), ...document.querySelectorAll("section.theme")];
-    secs.forEach((sec, i) => {
-      if (!sec) return;
-      // zwei Elemente pro Abschnitt: oben rechts und unten links (weg von Titel und Bildern)
-      [[0, i], [1, i+2]].forEach(([spot, k]) => {
-        if (spot === 0 && sec.querySelector(".clients--inline")) return;   // nicht hinter die Logo-Leiste
-        const kind = kinds[k % kinds.length], [svg, anim] = M[kind];
-        const el = document.createElement("div"); el.className = "deco" + (anim ? " deco--" + anim : ""); el.setAttribute("aria-hidden","true");
-        const sz = (small ? 70 : 120) + Math.round(Math.random()*(small ? 30 : 60));
-        el.style.width = el.style.height = sz + "px";
-        if (spot === 0){ el.style.top = (small ? 9 : 7) + Math.random()*5 + "%"; el.style.right = 4 + Math.random()*8 + "%"; }
-        else { el.style.bottom = (small ? 6 : 5) + Math.random()*5 + "%"; el.style.left = 4 + Math.random()*10 + "%"; }
-        el.innerHTML = svg; sec.prepend(el);
-      });
-    });
-  });
 </script>
 
 <div class="loader" id="loader">
@@ -685,7 +671,7 @@ const sections = CONFIG.galleries.map(cfg => {
   const sec = document.createElement("section");
   sec.className = "theme"; sec.id = cfg.id || slug(cfg.name);
   sec.setAttribute("aria-label", cfg.name);
-  sec.innerHTML = `<div class="theme__stage"><canvas class="gl"></canvas><div class="cat"></div><div class="gal-count"></div>${cfg.link ? `<a class="theme__link" href="${cfg.link.url}" target="_blank" rel="noopener">${cfg.link.label} ↗</a>` : ""}</div>`;
+  sec.innerHTML = `<div class="theme__stage"><canvas class="gl"></canvas><div class="cat"></div><div class="gal-count"></div><div class="vf" aria-hidden="true"><i></i><i></i><i></i><i></i><b>REC</b></div>${cfg.link ? `<a class="theme__link" href="${cfg.link.url}" target="_blank" rel="noopener">${cfg.link.label} ↗</a>` : ""}</div>`;
   themesEl.appendChild(sec);
   return sec;
 });
@@ -978,6 +964,12 @@ function createGallery(cfg, ci, sec){
     sec.style.setProperty("--cy", ((1 - c.y) / 2 * h) + "px");
     const b = new THREE.Vector3(0, -PH / 2, 0).project(camera);
     sec.style.setProperty("--ch", (((c.y - b.y) / 2) * h + 26) + "px");
+    // Sucher-Rahmen: von knapp über dem Namen bis unter den Zähler
+    const nameEl = catEl.firstElementChild, nmH = nameEl ? nameEl.offsetHeight : 40;
+    const vTop = Math.max(8, parseFloat(catEl.style.top) - nmH - Math.max(18, h * 0.025));
+    const vBot = Math.min(h - 8, (1 - c.y) / 2 * h + ((c.y - b.y) / 2) * h + 26 + 14 + Math.max(16, h * 0.02));
+    sec.style.setProperty("--vft", vTop + "px");
+    sec.style.setProperty("--vfh", (vBot - vTop) + "px");
   };
 
   const nudge = dx => {
@@ -1118,6 +1110,12 @@ const visIO = new IntersectionObserver(entries => entries.forEach(en => {
   if (g.visible) g.show(); else g.pauseVideos();
 }));
 sections.forEach(s => { preIO.observe(s); visIO.observe(s); });
+// Sucher-Rahmen „stellt scharf“, wenn eine Galerie ins Bild kommt
+const vfIO = new IntersectionObserver(entries => entries.forEach(en => {
+  const vf = en.target.querySelector(".vf"); if (!vf) return;
+  if (en.isIntersecting) { vf.classList.remove("is-focus"); void vf.offsetWidth; vf.classList.add("is-focus"); }
+}), { threshold: .6 });
+sections.forEach(s => vfIO.observe(s));
 
 /* ---------- Größe ---------- */
 function resizeAll(){ GALS.forEach(g => g.resize()); }
