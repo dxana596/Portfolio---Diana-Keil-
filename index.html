@@ -648,7 +648,7 @@ const CONFIG = {
   },
   // Kundenstimmen: einfach Text, Name und (optional) Art des Auftrags eintragen. Mehrere wechseln automatisch.
   testimonials: [
-    { text: "Hier steht bald, was meine Kundinnen und Kunden über die Zusammenarbeit mit mir sagen.", name: "Name", type: "Hochzeit" },   // PLATZHALTER – durch echte Stimme ersetzen
+    { text: "Hier steht bald, was meine Kundinnen und Kunden über die Zusammenarbeit mit mir sagen.", name: "Name", type: "Hochzeit", placeholder: true },   // PLATZHALTER – nur lokal sichtbar, online ausgeblendet. Durch echte Stimme ersetzen
   ],
   autoSpeed: 0.45,   // Geschwindigkeit der automatischen Drehung (0 = aus)
 };
@@ -1266,7 +1266,8 @@ const io = new IntersectionObserver(entries => entries.forEach(en => {
 }), { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
 // Kundenstimmen aufbauen (wechseln alle 7 Sekunden, wenn es mehrere gibt)
 (function(){
-  const list = CONFIG.testimonials || [], sec = document.getElementById("stimmen");
+  const local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  const list = (CONFIG.testimonials || []).filter(t => local || !t.placeholder), sec = document.getElementById("stimmen");   // Platzhalter nur lokal zeigen
   if (!list.length) { sec.remove(); return; }
   const stage = document.getElementById("testiStage"), dotsEl = document.getElementById("testiDots");
   const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
