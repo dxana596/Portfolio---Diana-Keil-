@@ -266,18 +266,16 @@
     .title{top:12vh}
   }
   @media (prefers-reduced-motion:reduce){ .grain{animation:none} }
-  /* ---------- Bewegter Hintergrund: weiches Gold-Licht, schwebende Punkte, großer Ring ---------- */
+  /* ---------- Bewegter Hintergrund: Seiden-Linien + Gold-Punkte (Canvas), Kamera-Elemente in den Abschnitten ---------- */
   .bgfx{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-  /* Punkte: nur feste Werte in den Animationen (keine Variablen) – so laufen sie auch beim Scrollen auf dem iPhone weiter */
-  .bgfx__dot{position:absolute;bottom:-12px}
-  .bgfx__dot b{display:block;width:100%;height:100%;border-radius:50%;background:var(--gold);opacity:0;animation:dotA linear infinite;will-change:transform,opacity;transform:translateZ(0)}
-  .bgfx__dot:nth-child(4n+1) b{animation-name:dotB}
-  .bgfx__dot:nth-child(4n+2) b{animation-name:dotC}
-  .bgfx__dot:nth-child(4n+3) b{animation-name:dotD}
-  @keyframes dotA{0%{transform:translate3d(0,0,0);opacity:0}12%{opacity:1}85%{opacity:1}100%{transform:translate3d(40px,-110vh,0);opacity:0}}
-  @keyframes dotB{0%{transform:translate3d(0,0,0);opacity:0}12%{opacity:1}85%{opacity:1}100%{transform:translate3d(-40px,-110vh,0);opacity:0}}
-  @keyframes dotC{0%{transform:translate3d(0,0,0);opacity:0}12%{opacity:1}85%{opacity:1}100%{transform:translate3d(15px,-110vh,0);opacity:0}}
-  @keyframes dotD{0%{transform:translate3d(0,0,0);opacity:0}12%{opacity:1}85%{opacity:1}100%{transform:translate3d(-15px,-110vh,0);opacity:0}}
+  .bgfx canvas{display:block;width:100%;height:100%}
+  .deco{position:absolute;z-index:0;pointer-events:none;color:var(--gold);opacity:.38}
+  .deco svg{display:block;width:100%;height:100%;overflow:visible}
+  .deco--spin svg{animation:decoSpin 60s linear infinite}
+  .deco--pulse svg{animation:decoPulse 6s ease-in-out infinite}
+  @keyframes decoSpin{to{transform:rotate(360deg)}}
+  @keyframes decoPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.94);opacity:.55}}
+  @media (prefers-reduced-motion:reduce){.deco svg{animation:none}}
   .hero{z-index:5}
 
   /* Eigener Cursor: Gold-Punkt + nachziehender Ring (nur Maus, nicht Handy) */
@@ -308,13 +306,128 @@
 <div class="bgfx" id="bgfx" aria-hidden="true">
 </div>
 <script>
-  // schwebende Gold-Punkte im Hintergrund
-  (function(){ const box = document.getElementById("bgfx"), n = innerWidth < 640 ? 14 : 26;
-    for (let i = 0; i < n; i++) { const d = document.createElement("i"); d.className = "bgfx__dot";
-      const s = 2 + Math.random() * 4;
-      d.style.cssText = `left:${Math.random()*100}%;width:${s}px;height:${s}px;opacity:${(.25+Math.random()*.45).toFixed(2)}`;
-      const b = document.createElement("b"); b.style.cssText = `animation-duration:${(14+Math.random()*16).toFixed(1)}s;animation-delay:${(-Math.random()*30).toFixed(1)}s`; d.appendChild(b);
-      box.appendChild(d); } })();
+  // Hintergrund: goldene Seiden-Linien + schwebende Gold-Punkte, die Maus/Finger ausweichen und sich verbinden
+  (function(){
+    const box = document.getElementById("bgfx"), cv = document.createElement("canvas"); box.appendChild(cv);
+    const ctx = cv.getContext("2d"), still = matchMedia("(prefers-reduced-motion:reduce)").matches;
+    let W = 0, H = 0, dpr = 1, phone = false, dots = [];
+    const ptr = { x:-999, y:-999, on:0 };
+    function size(){
+      dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; phone = W < 640;
+      cv.width = W*dpr; cv.height = H*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+      const n = phone ? 16 : 30;
+      while (dots.length < n) dots.push(newDot(true));
+      dots.length = n;
+    }
+    function newDot(any){
+      return { x: Math.random()*W, y: any ? Math.random()*H : H + 10, r: 1 + Math.random()*2,
+               vy: -(H/ (14 + Math.random()*16)) / 60, vx: (Math.random()-.5)*.25, ox:0, oy:0,
+               a: .3 + Math.random()*.45, w: Math.random()*6.28 };
+    }
+    addEventListener("resize", size); size();
+    const setPtr = (x,y) => { ptr.x = x; ptr.y = y; ptr.on = 1; };
+    addEventListener("pointermove", e => setPtr(e.clientX, e.clientY), { passive:true });
+    addEventListener("pointerdown", e => setPtr(e.clientX, e.clientY), { passive:true });
+    addEventListener("touchmove", e => { const t = e.touches[0]; if (t) setPtr(t.clientX, t.clientY); }, { passive:true });
+    document.addEventListener("mouseleave", () => ptr.on = 0);
+
+    // Seiden-Bänder: je ein Bündel feiner Linien, die sich langsam wiegen
+    const bands = [
+      { y:.22, amp:.07, f:1.3, sp:.00011, lines:11, spread:34, al:.16 },
+      { y:.58, amp:.09, f:.9,  sp:.00008, lines:13, spread:46, al:.13 },
+      { y:.86, amp:.06, f:1.7, sp:.00014, lines:9,  spread:26, al:.11 },
+    ];
+    function silk(t){
+      const step = phone ? 14 : 10;
+      for (const b of bands){
+        const L = phone ? Math.ceil(b.lines*.7) : b.lines;
+        for (let i = 0; i < L; i++){
+          const k = i/(L-1) - .5;
+          ctx.beginPath();
+          for (let x = -20; x <= W + 20; x += step){
+            const u = x / W, ph = t*b.sp;
+            const y = H*b.y
+              + Math.sin(u*Math.PI*2*b.f + ph*6 + k*.9) * H*b.amp
+              + Math.sin(u*Math.PI*3.1 - ph*4 + 1.7) * H*b.amp*.45
+              + k*b.spread*(1 + .6*Math.sin(u*5 + ph*5));
+            x === -20 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+          }
+          ctx.strokeStyle = `rgba(196,154,82,${(b.al*(1 - Math.abs(k)*1.2)).toFixed(3)})`;
+          ctx.lineWidth = .8; ctx.stroke();
+        }
+      }
+    }
+    let last = performance.now();
+    function frame(t){
+      const dt = Math.min(3, (t - last)/16.7); last = t;
+      ctx.clearRect(0,0,W,H);
+      silk(t);
+      ptr.on = Math.max(0, ptr.on - (phone ? .012 : .002)*dt);
+      const R = phone ? 110 : 150;
+      for (const d of dots){
+        d.y += d.vy*dt; d.x += (d.vx + Math.sin(t*.0007 + d.w)*.15)*dt;
+        if (d.y < -20) Object.assign(d, newDot(false));
+        // ausweichen
+        let tx = 0, ty = 0;
+        if (ptr.on > 0){
+          const dx = d.x - ptr.x, dy = d.y - ptr.y, dist = Math.hypot(dx,dy);
+          if (dist < R && dist > .1){ const f = (1 - dist/R)*38*ptr.on; tx = dx/dist*f; ty = dy/dist*f; }
+        }
+        d.ox += (tx - d.ox)*.08*dt; d.oy += (ty - d.oy)*.08*dt;
+        d.px = d.x + d.ox; d.py = d.y + d.oy;
+      }
+      // Sternbild-Linien zwischen nahen Punkten in der Nähe von Maus/Finger
+      if (ptr.on > 0){
+        const R2 = R*1.6;
+        for (let i = 0; i < dots.length; i++){
+          const a = dots[i]; if (Math.hypot(a.px-ptr.x, a.py-ptr.y) > R2) continue;
+          for (let j = i+1; j < dots.length; j++){
+            const b = dots[j]; if (Math.hypot(b.px-ptr.x, b.py-ptr.y) > R2) continue;
+            const dd = Math.hypot(a.px-b.px, a.py-b.py); if (dd > 170) continue;
+            ctx.strokeStyle = `rgba(196,154,82,${((1 - dd/170)*.55*ptr.on).toFixed(3)})`;
+            ctx.lineWidth = .7; ctx.beginPath(); ctx.moveTo(a.px,a.py); ctx.lineTo(b.px,b.py); ctx.stroke();
+          }
+        }
+      }
+      for (const d of dots){
+        const fade = Math.min(1, (H - d.py)/(H*.12), (d.py + 20)/(H*.15));
+        ctx.globalAlpha = Math.max(0, d.a*fade); ctx.fillStyle = "#c49a52";
+        ctx.beginPath(); ctx.arc(d.px, d.py, d.r, 0, 6.283); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      if (!still) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+
+  // Kamera-Elemente: zarte Gold-Linien (Fokus-Ecken, Blende, Raster) in den Abschnitten – scrollen mit der Seite
+  addEventListener("load", function(){
+    const S = (inner) => `<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="1" vector-effect="non-scaling-stroke">${inner}</svg>`;
+    const blades = Array.from({length:6}, (_,i) => { const a = i*Math.PI/3, b = a + 1.25;
+      return `<line x1="${50+46*Math.cos(a)}" y1="${50+46*Math.sin(a)}" x2="${50+18*Math.cos(b)}" y2="${50+18*Math.sin(b)}"/>`; }).join("");
+    const M = {
+      focus: [S(`<path d="M0 18V0h18M82 0h18v18M100 82v18H82M18 100H0V82"/><path d="M50 44v12M44 50h12"/>`), "pulse"],
+      aperture: [S(`<circle cx="50" cy="50" r="46"/>${blades}`), "spin"],
+      grid: [S(`<rect x="0" y="0" width="100" height="100" stroke-dasharray="2 3"/><path d="M33.3 0v100M66.6 0v100M0 33.3h100M0 66.6h100"/><circle cx="33.3" cy="33.3" r="2.5" fill="currentColor"/><circle cx="66.6" cy="66.6" r="2.5" fill="currentColor"/>`), ""],
+      af: [S(`<rect x="25" y="25" width="50" height="50"/>${[15,50,85].flatMap(x=>[15,50,85].map(y=>`<circle cx="${x}" cy="${y}" r="1.6" fill="currentColor"/>`)).join("")}`), "pulse"],
+    };
+    const kinds = Object.keys(M), small = innerWidth < 640;
+    const secs = [document.getElementById("hero"), ...document.querySelectorAll("section.theme")];
+    secs.forEach((sec, i) => {
+      if (!sec) return;
+      // zwei Elemente pro Abschnitt: oben rechts und unten links (weg von Titel und Bildern)
+      [[0, i], [1, i+2]].forEach(([spot, k]) => {
+        if (spot === 0 && sec.querySelector(".clients--inline")) return;   // nicht hinter die Logo-Leiste
+        const kind = kinds[k % kinds.length], [svg, anim] = M[kind];
+        const el = document.createElement("div"); el.className = "deco" + (anim ? " deco--" + anim : ""); el.setAttribute("aria-hidden","true");
+        const sz = (small ? 70 : 120) + Math.round(Math.random()*(small ? 30 : 60));
+        el.style.width = el.style.height = sz + "px";
+        if (spot === 0){ el.style.top = (small ? 9 : 7) + Math.random()*5 + "%"; el.style.right = 4 + Math.random()*8 + "%"; }
+        else { el.style.bottom = (small ? 6 : 5) + Math.random()*5 + "%"; el.style.left = 4 + Math.random()*10 + "%"; }
+        el.innerHTML = svg; sec.prepend(el);
+      });
+    });
+  });
 </script>
 
 <div class="loader" id="loader">
