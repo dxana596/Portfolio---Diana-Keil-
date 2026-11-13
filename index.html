@@ -274,11 +274,6 @@
   .bgfx__dot:nth-child(4n+1) b{animation-name:dotB}
   .bgfx__dot:nth-child(4n+2) b{animation-name:dotC}
   .bgfx__dot:nth-child(4n+3) b{animation-name:dotD}
-  /* funkelnde Gold-Sterne im Hintergrund */
-  .bgfx__star{position:absolute;color:var(--gold-hi)}
-  .bgfx__star svg{display:block;width:100%;height:100%;opacity:0;transform:scale(.2);animation:twinkle ease-in-out infinite;will-change:transform,opacity;filter:drop-shadow(0 0 4px rgba(212,176,106,.8))}
-  @keyframes twinkle{0%,100%{opacity:0;transform:scale(.2) rotate(0deg)}45%{opacity:1;transform:scale(1) rotate(45deg)}60%{opacity:.85;transform:scale(.85) rotate(60deg)}}
-  @media (prefers-reduced-motion:reduce){.bgfx__star svg{animation:none;opacity:.6;transform:none}}
   @keyframes dotA{0%{transform:translate3d(0,0,0);opacity:0}12%{opacity:1}85%{opacity:1}100%{transform:translate3d(40px,-110vh,0);opacity:0}}
   @keyframes dotB{0%{transform:translate3d(0,0,0);opacity:0}12%{opacity:1}85%{opacity:1}100%{transform:translate3d(-40px,-110vh,0);opacity:0}}
   @keyframes dotC{0%{transform:translate3d(0,0,0);opacity:0}12%{opacity:1}85%{opacity:1}100%{transform:translate3d(15px,-110vh,0);opacity:0}}
@@ -319,17 +314,7 @@
       const s = 2 + Math.random() * 4;
       d.style.cssText = `left:${Math.random()*100}%;width:${s}px;height:${s}px;opacity:${(.25+Math.random()*.45).toFixed(2)}`;
       const b = document.createElement("b"); b.style.cssText = `animation-duration:${(14+Math.random()*16).toFixed(1)}s;animation-delay:${(-Math.random()*30).toFixed(1)}s`; d.appendChild(b);
-      box.appendChild(d); }
-    // funkelnde Sterne an festen Stellen, die nacheinander aufleuchten
-    const STAR = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 0C13 8 16 11 24 12C16 13 13 16 12 24C11 16 8 13 0 12C8 11 11 8 12 0Z"/></svg>';
-    const m = innerWidth < 640 ? 10 : 18;
-    for (let i = 0; i < m; i++) { const st = document.createElement("i"); st.className = "bgfx__star";
-      const s = 8 + Math.random() * 10;
-      st.style.cssText = `left:${(3+Math.random()*94).toFixed(1)}%;top:${(3+Math.random()*94).toFixed(1)}%;width:${s}px;height:${s}px` + (Math.random() < .35 ? ";color:#c49a52" : "");
-      st.innerHTML = STAR; const svg = st.firstChild;
-      svg.style.animationDuration = (3.5 + Math.random()*4).toFixed(1) + "s";
-      svg.style.animationDelay = (-Math.random()*8).toFixed(1) + "s";
-      box.appendChild(st); } })();
+      box.appendChild(d); } })();
 </script>
 
 <div class="loader" id="loader">
