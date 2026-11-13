@@ -280,6 +280,18 @@
   @keyframes dotD{0%{transform:translate3d(0,0,0);opacity:0}12%{opacity:1}85%{opacity:1}100%{transform:translate3d(-15px,-110vh,0);opacity:0}}
   .hero{z-index:5}
 
+  /* Eigener Cursor: Gold-Punkt + nachziehender Ring (nur Maus, nicht Handy) */
+  .cur{display:none}
+  @media (hover:hover) and (pointer:fine){
+    html.has-cur, html.has-cur *{cursor:none !important}
+    .cur{display:block;position:fixed;left:0;top:0;z-index:9999;pointer-events:none;border-radius:50%;opacity:0;transition:opacity .3s}
+    html.cur-on .cur{opacity:1}
+    .cur--dot{width:7px;height:7px;margin:-3.5px 0 0 -3.5px;background:var(--gold)}
+    .cur--ring{width:38px;height:38px;margin:-19px 0 0 -19px;border:1.5px solid var(--gold);transition:opacity .3s, width .25s, height .25s, margin .25s, background .25s, border-color .25s}
+    html.cur-link .cur--ring{width:60px;height:60px;margin:-30px 0 0 -30px;background:rgba(196,154,82,.14);border-color:var(--gold-hi)}
+    html.cur-view .cur--ring{width:78px;height:78px;margin:-39px 0 0 -39px;background:rgba(196,154,82,.12)}
+    html.cur-down .cur--ring{width:26px;height:26px;margin:-13px 0 0 -13px}
+  }
 </style>
 <script>
   // Seite startet immer ganz oben – auch beim Neuladen und wenn ein #Anker in der Adresse steht
@@ -1130,6 +1142,33 @@ function tick(){
   requestAnimationFrame(tick);
 }
 tick();
+</script>
+<div class="cur cur--ring" id="curRing" aria-hidden="true"></div>
+<div class="cur cur--dot" id="curDot" aria-hidden="true"></div>
+<script>
+  (function(){
+    if (!matchMedia("(hover:hover) and (pointer:fine)").matches) return;
+    const root = document.documentElement, dot = document.getElementById("curDot"), ring = document.getElementById("curRing");
+    root.classList.add("has-cur");
+    let x = innerWidth/2, y = innerHeight/2, rx = x, ry = y;
+    addEventListener("pointermove", e => {
+      if (e.pointerType !== "mouse") return;
+      x = e.clientX; y = e.clientY;
+      dot.style.transform = `translate3d(${x}px,${y}px,0)`;
+      root.classList.add("cur-on");
+      const t = e.target;
+      root.classList.toggle("cur-link", !!(t.closest && t.closest("a,button,[role=button],summary,label")));
+      root.classList.toggle("cur-view", t.tagName === "CANVAS" && t.style.cursor === "zoom-in");
+    }, { passive:true });
+    addEventListener("pointerdown", () => root.classList.add("cur-down"));
+    addEventListener("pointerup", () => root.classList.remove("cur-down"));
+    document.addEventListener("mouseleave", () => root.classList.remove("cur-on"));
+    (function loop(){
+      rx += (x - rx) * .18; ry += (y - ry) * .18;
+      ring.style.transform = `translate3d(${rx}px,${ry}px,0)`;
+      requestAnimationFrame(loop);
+    })();
+  })();
 </script>
 </body>
 </html>
