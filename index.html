@@ -375,6 +375,14 @@
   @keyframes leak{0%,100%{opacity:.18;transform:translate(0,0) scale(1)}35%{opacity:.62;transform:translate(6vmax,4vmax) scale(1.12)}60%{opacity:.3;transform:translate(-3vmax,7vmax) scale(.95)}}
   @media (prefers-reduced-motion:reduce){.leaks i{animation:none;opacity:.3}}
   html[data-theme="light"] .leaks{display:none}
+  /* Weniger Grafik: Seidenlinien/Punkte im Hintergrund und Lichtflecken ausgeblendet (zum Zurückholen diese zwei Zeilen löschen) */
+  .bgfx canvas{display:none}
+  .leaks{display:none}
+  /* Dunkler Modus: fester Farbverlauf Espresso → Karamell hinter allem */
+  html:not([data-theme="light"]) .bgfx{background:
+    radial-gradient(120% 90% at 100% 100%,rgba(176,122,62,.55),rgba(176,122,62,0) 60%),
+    radial-gradient(80% 60% at 85% 70%,rgba(206,150,82,.22),rgba(206,150,82,0) 70%),
+    linear-gradient(160deg,#2a1d17 0%,#3a2a22 45%,#5b3f2a 100%)}
   /* 3D-Kippen des Startfotos */
   .intro__tilt{position:absolute;inset:0;will-change:transform;border-radius:4px;box-shadow:0 30px 60px -30px rgba(0,0,0,.55)}
   .intro__glare{position:absolute;inset:0;border-radius:4px;pointer-events:none;opacity:calc(var(--ga,0) * .35);
@@ -420,7 +428,8 @@
 </div>
 <script>
   // Hintergrund: goldene Seiden-Linien + schwebende Gold-Punkte, die Maus/Finger ausweichen und sich verbinden
-  (function(){
+  const BG_LINES = false;   // true = Seidenlinien und Punkte wieder anzeigen (dann auch ".bgfx canvas{display:none}" im CSS löschen)
+  if (BG_LINES) (function(){
     const box = document.getElementById("bgfx"), cv = document.createElement("canvas"); box.appendChild(cv);
     const ctx = cv.getContext("2d"), still = matchMedia("(prefers-reduced-motion:reduce)").matches;
     let W = 0, H = 0, dpr = 1, phone = false, dots = [];
