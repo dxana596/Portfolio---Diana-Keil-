@@ -373,10 +373,10 @@
   .leaks i:nth-child(3){width:30vmax;height:60vmax;right:-14vmax;top:-10vmax;background:radial-gradient(closest-side,rgba(255,96,64,.38),transparent);animation-duration:37s;animation-delay:-17s}
   @keyframes leak{0%,100%{opacity:.18;transform:translate(0,0) scale(1)}35%{opacity:.62;transform:translate(6vmax,4vmax) scale(1.12)}60%{opacity:.3;transform:translate(-3vmax,7vmax) scale(.95)}}
   @media (prefers-reduced-motion:reduce){.leaks i{animation:none;opacity:.3}}
-  /* Startfoto zum Anfassen (verformbar) */
-  .intro__tilt{position:absolute;inset:0;border-radius:4px}
-  .intro__gl{position:absolute;left:-9%;top:-9%;width:118%;height:118%;pointer-events:auto;display:block}
-  .intro__photo.is-gl .intro__tilt img{visibility:hidden}
+  /* 3D-Kippen des Startfotos */
+  .intro__tilt{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform;border-radius:4px;box-shadow:0 30px 60px -30px rgba(0,0,0,.55)}
+  .intro__glare{position:absolute;inset:0;border-radius:4px;pointer-events:none;mix-blend-mode:soft-light;opacity:var(--ga,0);
+    background:radial-gradient(circle at var(--gx,50%) var(--gy,30%),rgba(255,255,255,.75),rgba(255,255,255,0) 55%)}
 </style>
 <script>
   // Seite startet immer ganz oben – auch beim Neuladen und wenn ein #Anker in der Adresse steht
@@ -739,7 +739,7 @@ document.getElementById("introText").textContent = CONFIG.introText;
 // Fotos von dir: liegen übereinander und wechseln sich alle 5 Sekunden sanft ab
 if (CONFIG.portraits.length) {
   const photoEl = document.getElementById("introPhoto");
-  photoEl.innerHTML = `<div class="intro__ring"><svg class="ring" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1"/><g fill="currentColor"><circle cx="100" cy="20" r="2.6"/><circle cx="169.3" cy="60" r="2.6"/><circle cx="169.3" cy="140" r="2.6"/><circle cx="100" cy="180" r="2.6"/><circle cx="30.7" cy="140" r="2.6"/><circle cx="30.7" cy="60" r="2.6"/></g></svg></div>` + `<div class="intro__tilt" id="introTilt">` + CONFIG.portraits.map((p, i) => { const src = p.src || p; return `<img src="${src}" alt="${CONFIG.bigTitle}"${p.pos ? ` style="object-position:${p.pos}"` : ""}${i ? ' aria-hidden="true"' : ' class="is-on"'}>`; }).join("") + `</div>`;
+  photoEl.innerHTML = `<div class="intro__ring"><svg class="ring" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1"/><g fill="currentColor"><circle cx="100" cy="20" r="2.6"/><circle cx="169.3" cy="60" r="2.6"/><circle cx="169.3" cy="140" r="2.6"/><circle cx="100" cy="180" r="2.6"/><circle cx="30.7" cy="140" r="2.6"/><circle cx="30.7" cy="60" r="2.6"/></g></svg></div>` + `<div class="intro__tilt" id="introTilt">` + CONFIG.portraits.map((p, i) => { const src = p.src || p; return `<img src="${src}" alt="${CONFIG.bigTitle}"${p.pos ? ` style="object-position:${p.pos}"` : ""}${i ? ' aria-hidden="true"' : ' class="is-on"'}>`; }).join("") + `<div class="intro__glare"></div></div>`;
   const imgs = [...photoEl.querySelectorAll("img")];   // nur die Fotos (nicht der Ring dahinter)
   let pi = 0;
   if (imgs.length > 1) setInterval(() => {
@@ -750,118 +750,40 @@ if (CONFIG.portraits.length) {
     pi = next;
     imgs[pi].classList.add("is-on");
   }, 5000);
-  jellyPhoto(photoEl, document.getElementById("introTilt"), imgs);
+  tiltPhoto(photoEl, document.getElementById("introTilt"));
 }
 
-// Startfoto zum Anfassen: mit Maus oder Finger lassen sich einzelne Stellen verziehen, danach federt das Bild zurück
-function jellyPhoto(box, wrap, imgs){
+// 3D-Kippen: Foto neigt sich zur Maus (am Handy: beim Neigen des Telefons), ein Glanz wandert mit
+function tiltPhoto(box, el){
   if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
-  let renderer;
-  try { renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true }); } catch { return; }
-  const cv = renderer.domElement; cv.className = "intro__gl";
-  wrap.appendChild(cv);
-  renderer.setPixelRatio(Math.min(2, devicePixelRatio));
-  const PAD = 0.18;   // Zeichenfläche ist größer als das Foto, damit verzogene Ränder nicht abgeschnitten werden
-  const scene = new THREE.Scene(), cam = new THREE.OrthographicCamera(-1 - PAD, 1 + PAD, 1 + PAD, -1 - PAD, -1, 1);
-  const U = {
-    uA: { value: null }, uB: { value: null }, uMix: { value: 0 },
-    uCovA: { value: new THREE.Vector4(1, 1, 0, 0) }, uCovB: { value: new THREE.Vector4(1, 1, 0, 0) },
-    uMouse: { value: new THREE.Vector2(9, 9) }, uDrag: { value: new THREE.Vector2() }, uPress: { value: 0 },
-    uAsp: { value: 1.5 }, uTime: { value: 0 },
-  };
-  const mat = new THREE.ShaderMaterial({ uniforms: U, transparent: true,
-    vertexShader: `
-      uniform vec2 uMouse, uDrag; uniform float uPress, uAsp, uTime;
-      varying vec2 vUv;
-      void main(){
-        vUv = uv;
-        vec2 p = position.xy;
-        vec2 d = (p - uMouse) * vec2(1.0, uAsp);
-        float f = exp(-dot(d, d) / 0.34);              // Einflussbereich rund um den Zeiger
-        p += uDrag * f;                                  // Stelle wird in Zugrichtung mitgezogen
-        p += (p - uMouse) * f * uPress * 0.12;           // leichte Wölbung unter dem Zeiger
-        gl_Position = vec4(p / (1.0 + ${PAD.toFixed(2)}), 0.0, 1.0);
-      }`,
-    fragmentShader: `
-      uniform sampler2D uA, uB; uniform float uMix; uniform vec4 uCovA, uCovB;
-      varying vec2 vUv;
-      vec3 pick(sampler2D t, vec4 c){ return texture2D(t, (vUv - 0.5) * c.xy + 0.5 + c.zw).rgb; }
-      void main(){
-        vec3 a = pick(uA, uCovA), b = pick(uB, uCovB);
-        gl_FragColor = vec4(mix(a, b, uMix), 1.0);
-        #include <colorspace_fragment>
-      }`,
-  });
-  scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2, 70, 100), mat));
-
-  // Fotos als Texturen (wie object-fit:cover, inkl. object-position)
-  const loader = new THREE.TextureLoader(), tex = [];
-  const cover = (i, v4) => {
-    const t = tex[i]; if (!t) return;
-    const ia = t.image.width / t.image.height, ba = box.clientWidth / box.clientHeight;
-    const sx = ia > ba ? ba / ia : 1, sy = ia > ba ? 1 : ia / ba;
-    const pos = (imgs[i].style.objectPosition || "50% 50%").split(" ").map(x => parseFloat(x) / 100);
-    v4.set(sx, sy, (pos[0] - 0.5) * (1 - sx), -(pos[1] - 0.5) * (1 - sy));
-  };
-  let cur = Math.max(0, imgs.findIndex(im => im.classList.contains("is-on"))), prev = cur, fadeT = 1;
-  const load = i => new Promise(res => {
-    if (tex[i]) return res(tex[i]);
-    loader.load(imgs[i].currentSrc || imgs[i].src, t => { t.colorSpace = THREE.SRGBColorSpace; tex[i] = t; res(t); }, undefined, () => res(null));
-  });
-  function resize(){
-    const w = box.clientWidth, h = box.clientHeight;
-    renderer.setSize(w * (1 + PAD), h * (1 + PAD), false);
-    U.uAsp.value = h / w;
-    cover(prev, U.uCovA.value); cover(cur, U.uCovB.value);
-    kick();
-  }
-  addEventListener("resize", resize);
-  load(cur).then(t => { if (!t) return; U.uA.value = U.uB.value = t; resize(); box.classList.add("is-gl"); kick(); });
-  // Fotowechsel der Startseite übernehmen (sanft überblenden)
-  new MutationObserver(() => {
-    const n = imgs.findIndex(im => im.classList.contains("is-on"));
-    if (n < 0 || n === cur) return;
-    load(n).then(t => {
-      if (!t) return;
-      prev = cur; cur = n;
-      U.uA.value = U.uB.value || t; U.uB.value = t; U.uMix.value = 0; fadeT = 0;
-      cover(prev, U.uCovA.value); cover(cur, U.uCovB.value); kick();
-    });
-  }).observe(wrap, { subtree: true, attributes: true, attributeFilter: ["class"] });
-
-  // Zeiger: Position im Foto (-1 … 1) und Zuggeschwindigkeit → federnde Verformung
-  const tgt = new THREE.Vector2(), vel = new THREE.Vector2(), drag = U.uDrag.value;
-  let last = null, press = 0, pressT = 0, running = false, lastT = 0;
-  const toLocal = e => { const r = box.getBoundingClientRect(); return new THREE.Vector2((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height * 2 - 1)); };
-  function move(e){
-    const p = toLocal(e);
-    if (Math.abs(p.x) > 1.6 || Math.abs(p.y) > 1.6) { last = null; pressT = 0; return; }
-    if (last) tgt.add(p.clone().sub(last).multiplyScalar(1.7)).clampLength(0, 0.55);
-    U.uMouse.value.copy(p); last = p; pressT = 1; kick();
+  const MAX = 22;   // stärkste Neigung in Grad
+  let tx = 0, ty = 0, cx = 0, cy = 0, running = false;
+  const set = (x, y) => { tx = Math.max(-1, Math.min(1, x)); ty = Math.max(-1, Math.min(1, y)); if (!running) { running = true; requestAnimationFrame(loop); } };
+  function loop(){
+    cx += (tx - cx) * 0.09; cy += (ty - cy) * 0.09;
+    el.style.transform = `perspective(1000px) rotateY(${cx * MAX}deg) rotateX(${-cy * MAX}deg) scale(${1 + (Math.abs(cx) + Math.abs(cy)) * 0.025})`;
+    el.style.setProperty("--gx", (50 + cx * 55) + "%"); el.style.setProperty("--gy", (50 + cy * 55) + "%");
+    el.style.setProperty("--ga", Math.min(1, Math.hypot(cx, cy) * 1.4).toFixed(3));
+    if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.002) requestAnimationFrame(loop); else running = false;
   }
   const hero = document.getElementById("hero");
-  hero.addEventListener("pointermove", move);
-  hero.addEventListener("pointerdown", move);
-  const leave = () => { last = null; pressT = 0; kick(); };
-  hero.addEventListener("pointerleave", leave);
-  hero.addEventListener("pointerup", e => { if (e.pointerType !== "mouse") leave(); });
-  hero.addEventListener("pointercancel", leave);
-  cv.style.touchAction = "pan-y";
-
-  function kick(){ if (!running) { running = true; lastT = performance.now(); requestAnimationFrame(frame); } }
-  function frame(now){
-    const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
-    // Feder: Verformung folgt dem Zug, schwingt nach und beruhigt sich
-    tgt.multiplyScalar(Math.exp(-dt * 4.5));
-    vel.add(tgt.clone().sub(drag).multiplyScalar(dt * 55)).multiplyScalar(Math.exp(-dt * 6.5));
-    drag.add(vel.clone().multiplyScalar(dt));
-    press += (pressT - press) * (1 - Math.exp(-dt * 6)); U.uPress.value = press;
-    if (fadeT < 1) { fadeT = Math.min(1, fadeT + dt / 1.6); U.uMix.value = fadeT * fadeT * (3 - 2 * fadeT); }
-    U.uTime.value = now / 1000;
-    renderer.render(scene, cam);
-    const busy = fadeT < 1 || drag.length() > 0.0005 || vel.length() > 0.0005 || tgt.length() > 0.0005 || Math.abs(pressT - press) > 0.002;
-    if (busy) requestAnimationFrame(frame); else running = false;
-  }
+  hero.addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse") return;
+    const r = box.getBoundingClientRect();
+    set((e.clientX - (r.left + r.width / 2)) / (r.width * 0.6), (e.clientY - (r.top + r.height / 2)) / (r.height * 0.5));
+  });
+  hero.addEventListener("pointerleave", () => set(0, 0));
+  // Handy: Neigung des Telefons (iPhone fragt beim ersten Antippen einmal um Erlaubnis)
+  let base = null;
+  const onOri = e => {
+    if (e.beta == null) return;
+    if (!base) base = { b: e.beta, g: e.gamma };
+    set((e.gamma - base.g) / 12, (e.beta - base.b) / 12);
+  };
+  const DOE = window.DeviceOrientationEvent;
+  if (DOE && typeof DOE.requestPermission === "function") {
+    addEventListener("touchend", () => { DOE.requestPermission().then(st => { if (st === "granted") addEventListener("deviceorientation", onOri); }).catch(() => {}); }, { once: true });
+  } else if (DOE) addEventListener("deviceorientation", onOri);
 }
 
 /* ---------- Galerien: unter der Startseite je ein Abschnitt pro Thema ---------- */
