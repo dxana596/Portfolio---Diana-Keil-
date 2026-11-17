@@ -374,13 +374,15 @@
   @keyframes leak{0%,100%{opacity:.18;transform:translate(0,0) scale(1)}35%{opacity:.62;transform:translate(6vmax,4vmax) scale(1.12)}60%{opacity:.3;transform:translate(-3vmax,7vmax) scale(.95)}}
   @media (prefers-reduced-motion:reduce){.leaks i{animation:none;opacity:.3}}
   /* 3D-Kippen des Startfotos */
-  .intro__tilt{position:absolute;inset:0;transform-style:preserve-3d;will-change:transform;border-radius:4px;box-shadow:0 30px 60px -30px rgba(0,0,0,.55)}
-  .intro__glare{position:absolute;inset:0;border-radius:4px;pointer-events:none;mix-blend-mode:soft-light;opacity:var(--ga,0);
+  .intro__tilt{position:absolute;inset:0;will-change:transform;border-radius:4px;box-shadow:0 30px 60px -30px rgba(0,0,0,.55)}
+  .intro__glare{position:absolute;inset:0;border-radius:4px;pointer-events:none;opacity:calc(var(--ga,0) * .35);
     background:radial-gradient(circle at var(--gx,50%) var(--gy,30%),rgba(255,255,255,.75),rgba(255,255,255,0) 55%)}
   /* Foto umdrehen: Vorder- und Rückseite */
   .intro__photo{cursor:pointer}
-  .intro__tilt img,.intro__glare{-webkit-backface-visibility:hidden;backface-visibility:hidden}
-  .intro__back{position:absolute;inset:0;border-radius:4px;transform:rotateY(180deg);-webkit-backface-visibility:hidden;backface-visibility:hidden;
+  .intro__back{visibility:hidden}
+  .intro__tilt.show-back .intro__back{visibility:visible}
+  .intro__tilt.show-back img,.intro__tilt.show-back .intro__glare{visibility:hidden}
+  .intro__back{position:absolute;inset:0;border-radius:4px;transform:rotateY(180deg);
     background:#f3ede3;color:#2a251f;display:grid;place-items:center;text-align:center;padding:10%;
     box-shadow:inset 0 0 0 10px #f3ede3,inset 0 0 0 11px rgba(196,154,82,.55)}
   .intro__backin{display:flex;flex-direction:column;align-items:center;gap:14px;text-transform:none;letter-spacing:normal}
@@ -783,7 +785,9 @@ function tiltPhoto(box, el){
   function loop(){
     cx += (tx - cx) * 0.09; cy += (ty - cy) * 0.09;
     flipV += (flipT - flip) * 0.035; flipV *= 0.78; flip += flipV;   // leicht federndes Umdrehen
-    el.style.transform = `perspective(2200px) rotateY(${cx * MAX + flip}deg) rotateX(${-cy * MAX}deg) scale(${1 + (Math.abs(cx) + Math.abs(cy)) * 0.025 + Math.sin(flip / 180 * Math.PI) * 0.06})`;
+    const ang = cx * MAX + flip;
+    el.classList.toggle("show-back", Math.cos(ang / 180 * Math.PI) < 0);
+    el.style.transform = `perspective(2200px) rotateY(${ang}deg) rotateX(${-cy * MAX}deg) scale(${1 + (Math.abs(cx) + Math.abs(cy)) * 0.025 + Math.sin(flip / 180 * Math.PI) * 0.06})`;
     el.style.setProperty("--gx", (50 + cx * 55) + "%"); el.style.setProperty("--gy", (50 + cy * 55) + "%");
     el.style.setProperty("--ga", Math.min(1, Math.hypot(cx, cy) * 1.4).toFixed(3));
     if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.002 || Math.abs(flipT - flip) > 0.05 || Math.abs(flipV) > 0.05) requestAnimationFrame(loop); else running = false;
