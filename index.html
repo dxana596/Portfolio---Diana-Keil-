@@ -777,9 +777,9 @@ function jellyPhoto(box, wrap, imgs){
         vUv = uv;
         vec2 p = position.xy;
         vec2 d = (p - uMouse) * vec2(1.0, uAsp);
-        float f = exp(-dot(d, d) / 0.16);              // Einflussbereich rund um den Zeiger
+        float f = exp(-dot(d, d) / 0.34);              // Einflussbereich rund um den Zeiger
         p += uDrag * f;                                  // Stelle wird in Zugrichtung mitgezogen
-        p += (p - uMouse) * f * uPress * 0.22;           // leichte Wölbung unter dem Zeiger
+        p += (p - uMouse) * f * uPress * 0.12;           // leichte Wölbung unter dem Zeiger
         gl_Position = vec4(p / (1.0 + ${PAD.toFixed(2)}), 0.0, 1.0);
       }`,
     fragmentShader: `
@@ -836,7 +836,7 @@ function jellyPhoto(box, wrap, imgs){
   function move(e){
     const p = toLocal(e);
     if (Math.abs(p.x) > 1.6 || Math.abs(p.y) > 1.6) { last = null; pressT = 0; return; }
-    if (last) tgt.add(p.clone().sub(last).multiplyScalar(2.2)).clampLength(0, 0.6);
+    if (last) tgt.add(p.clone().sub(last).multiplyScalar(1.7)).clampLength(0, 0.55);
     U.uMouse.value.copy(p); last = p; pressT = 1; kick();
   }
   const hero = document.getElementById("hero");
@@ -852,8 +852,8 @@ function jellyPhoto(box, wrap, imgs){
   function frame(now){
     const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
     // Feder: Verformung folgt dem Zug, schwingt nach und beruhigt sich
-    tgt.multiplyScalar(Math.exp(-dt * 7));
-    vel.add(tgt.clone().sub(drag).multiplyScalar(dt * 160)).multiplyScalar(Math.exp(-dt * 9));
+    tgt.multiplyScalar(Math.exp(-dt * 4.5));
+    vel.add(tgt.clone().sub(drag).multiplyScalar(dt * 55)).multiplyScalar(Math.exp(-dt * 6.5));
     drag.add(vel.clone().multiplyScalar(dt));
     press += (pressT - press) * (1 - Math.exp(-dt * 6)); U.uPress.value = press;
     if (fadeT < 1) { fadeT = Math.min(1, fadeT + dt / 1.6); U.uMix.value = fadeT * fadeT * (3 - 2 * fadeT); }
