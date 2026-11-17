@@ -363,6 +363,7 @@
   /* Farbschein hinter jeder Galerie: weiches Licht in den Farben des Bildes in der Mitte */
   .glow{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 1.2s ease;
     background:radial-gradient(ellipse 75% 62% at 50% var(--cy,50%),rgb(var(--glow,120 100 80) / .7),rgb(var(--glow,120 100 80) / .25) 50%,transparent 80%);filter:blur(40px)}
+  .glow{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 28%,#000 72%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 28%,#000 72%,transparent 100%)}
   .theme.is-lit .glow{opacity:1}
   /* Lichtreflexe wie bei alten Filmkameras (Light Leaks) */
   .leaks{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;mix-blend-mode:screen}
