@@ -343,13 +343,13 @@
   .fab svg{width:17px;height:17px;color:var(--gold-hi);flex:none}
 
   /* =========== Kino-Look: dunkle Seite mit goldenen Akzenten =========== */
-  :root{--bg:#1f2129;--fg:#efe9df;--muted:#9c958a;--gold-lo:#b8914c}
+  :root{--bg:#6b6158;--fg:#f6f1e9;--muted:#ddd4c8;--gold:#d8b46c;--gold-hi:#e8c987;--gold-lo:#ecd29e}
   .marquee__text{color:var(--fg)}
   .intro__lead{color:#cfc8bc}
   .marquee__track img{filter:brightness(0) invert(1);opacity:.55}
   .intro__photo{background:#161a22}
   .scrollcue__line{background:rgba(255,255,255,.18)}
-  .about{background:rgba(31,33,41,.85)}
+  .about{background:rgba(87,78,70,.9)}
   .about li a,.about li button,.about__close{background:var(--gold);color:var(--night)}
   .pill{background:var(--gold);color:var(--night)}
   .svc2,.svc2__card{border-color:rgba(255,255,255,.12)}
@@ -358,8 +358,8 @@
   .svc2__tags li{border-color:rgba(255,255,255,.18);color:#d8d2c8}
   .testi__card{--fg:#131720;--muted:#7a7468;color:#131720;box-shadow:0 24px 50px -24px rgba(0,0,0,.8)}
   .testi__name{color:#9a7a3d}
-  .contact{background:#17191f}
-  .fab{background:#2b2e38}
+  .contact{background:#574e46}
+  .fab{background:#4b433c}
   /* Farbschein hinter jeder Galerie: weiches Licht in den Farben des Bildes in der Mitte */
   .glow{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 1.2s ease;
     background:radial-gradient(ellipse 75% 62% at 50% var(--cy,50%),rgb(var(--glow,120 100 80) / .7),rgb(var(--glow,120 100 80) / .25) 50%,transparent 80%);filter:blur(40px)}
@@ -812,7 +812,7 @@ const frag = /* glsl */`
     vec3 col = texture2D(uTex, uv).rgb;
     // Videos kommen (anders als Fotos) noch sRGB-kodiert an → hier in linear umrechnen
     if (uDecode > 0.5) col = mix(pow(col * 0.9478672986 + vec3(0.0521327014), vec3(2.4)), col * 0.0773993808, vec3(lessThanEqual(col, vec3(0.04045))));
-    col = mix(vec3(0.015), col, uLoaded);   // dunkel, solange das Bild lädt
+    col = mix(vec3(0.13, 0.11, 0.09), col, uLoaded);   // dunkel, solange das Bild lädt
     // Aufrufe-Badge (unten links auf Reels)
     if (uHasBadge > 0.5 && uMirror < 0.5) {
       vec2 bq = (vUv - uBadgeRect.xy) / (uBadgeRect.zw - uBadgeRect.xy);
