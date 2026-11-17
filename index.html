@@ -818,17 +818,7 @@ function tiltPhoto(box, el){
     set(dx / rad * 1.2, dy / rad * 1.2);
   });
   hero.addEventListener("pointerleave", () => set(0, 0));
-  // Handy: Neigung des Telefons (iPhone fragt beim ersten Antippen einmal um Erlaubnis)
-  let base = null;
-  const onOri = e => {
-    if (e.beta == null) return;
-    if (!base) base = { b: e.beta, g: e.gamma };
-    set((e.gamma - base.g) / 12, (e.beta - base.b) / 12);
-  };
-  const DOE = window.DeviceOrientationEvent;
-  if (DOE && typeof DOE.requestPermission === "function") {
-    addEventListener("touchend", () => { DOE.requestPermission().then(st => { if (st === "granted") addEventListener("deviceorientation", onOri); }).catch(() => {}); }, { once: true });
-  } else if (DOE) addEventListener("deviceorientation", onOri);
+  // Am Handy kein Kippen per Neigung (sonst fragt das iPhone nach „Bewegung und Ausrichtung“)
 }
 
 /* ---------- Galerien: unter der Startseite je ein Abschnitt pro Thema ---------- */
