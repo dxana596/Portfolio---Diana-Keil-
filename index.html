@@ -937,11 +937,25 @@ function createGallery(cfg, ci, sec){
       // 3) erst wenn das Video wirklich läuft, vom Standbild aufs Video umschalten
       v.addEventListener("playing", () => {
         if (m.playing) return;
+        if (!v.videoWidth || !v.videoHeight) return;   // Größe noch unbekannt → beim nächsten "playing" nochmal
         m.playing = true;
-        m.tex = new THREE.VideoTexture(v);
+        // iPhone-Safari zeigt Videos direkt als Textur oft nur als Streifen an.
+        // Darum: jedes Videobild erst auf eine unsichtbare Zeichenfläche malen und die als Bild verwenden.
+        const sc = Math.min(1, 720 / v.videoWidth);
+        const cv = document.createElement("canvas");
+        cv.width = Math.round(v.videoWidth * sc); cv.height = Math.round(v.videoHeight * sc);
+        const cx = cv.getContext("2d");
+        cx.drawImage(v, 0, 0, cv.width, cv.height);
+        m.tex = new THREE.CanvasTexture(cv);
         m.tex.colorSpace = THREE.SRGBColorSpace;
-        applyMedia(m, v.videoWidth, v.videoHeight);
-        m.uniforms.forEach(u => (u.uDecode.value = 1));
+        m.tex.generateMipmaps = false; m.tex.minFilter = THREE.LinearFilter;
+        applyMedia(m, cv.width, cv.height);
+        m.uniforms.forEach(u => (u.uDecode.value = 0));   // Zeichenfläche ist wie ein Foto kodiert
+        const draw = () => {
+          if (!v.paused && v.readyState >= 2) { cx.drawImage(v, 0, 0, cv.width, cv.height); m.tex.needsUpdate = true; }
+          if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(draw); else requestAnimationFrame(draw);
+        };
+        draw();
       });
       m.el = v;
     }
