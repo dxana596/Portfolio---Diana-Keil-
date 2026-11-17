@@ -383,11 +383,12 @@
   .intro__back{position:absolute;inset:0;border-radius:4px;transform:rotateY(180deg);-webkit-backface-visibility:hidden;backface-visibility:hidden;
     background:#f3ede3;color:#2a251f;display:grid;place-items:center;text-align:center;padding:10%;
     box-shadow:inset 0 0 0 10px #f3ede3,inset 0 0 0 11px rgba(196,154,82,.55)}
-  .intro__backin{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .intro__backin{display:flex;flex-direction:column;align-items:center;gap:14px;text-transform:none;letter-spacing:normal}
   .intro__mono{width:76px;height:76px;border-radius:50%;border:1.5px solid #c49a52;display:grid;place-items:center;font-family:var(--serif);font-size:30px;letter-spacing:.06em;color:#9a7a3d;margin-bottom:6px}
   .intro__back b{font-family:var(--serif);font-weight:500;font-size:clamp(30px,3vw,46px);line-height:1}
   .intro__back i{font-style:normal;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#9a7a3d}
-  .intro__back em{font-family:var(--serif);font-size:clamp(17px,1.4vw,21px);color:#5a5148;max-width:16ch}
+  .intro__back em{font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(19px,1.7vw,27px);line-height:1.3;color:#2a251f;max-width:18ch}
+  .intro__qm{font-family:var(--serif);font-size:64px;line-height:.4;height:22px;color:#c49a52}
   .intro__back small{margin-top:18px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#9a8f82}
 </style>
 <script>
@@ -751,7 +752,7 @@ document.getElementById("introText").textContent = CONFIG.introText;
 // Fotos von dir: liegen übereinander und wechseln sich alle 5 Sekunden sanft ab
 if (CONFIG.portraits.length) {
   const photoEl = document.getElementById("introPhoto");
-  photoEl.innerHTML = `<div class="intro__ring"><svg class="ring" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1"/><g fill="currentColor"><circle cx="100" cy="20" r="2.6"/><circle cx="169.3" cy="60" r="2.6"/><circle cx="169.3" cy="140" r="2.6"/><circle cx="100" cy="180" r="2.6"/><circle cx="30.7" cy="140" r="2.6"/><circle cx="30.7" cy="60" r="2.6"/></g></svg></div>` + `<div class="intro__tilt" id="introTilt">` + CONFIG.portraits.map((p, i) => { const src = p.src || p; return `<img src="${src}" alt="${CONFIG.bigTitle}"${p.pos ? ` style="object-position:${p.pos}"` : ""}${i ? ' aria-hidden="true"' : ' class="is-on"'}>`; }).join("") + `<div class="intro__glare"></div><div class="intro__back" aria-hidden="true"><div class="intro__backin"><span class="intro__mono">DK</span><b>Diana Keil</b><i>Fotografie · Video · Social Media</i><em>Momente festhalten, die bleiben.</em><small>↻ zum Umdrehen tippen</small></div></div></div>`;
+  photoEl.innerHTML = `<div class="intro__ring"><svg class="ring" viewBox="0 0 200 200" fill="none" aria-hidden="true"><circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1"/><g fill="currentColor"><circle cx="100" cy="20" r="2.6"/><circle cx="169.3" cy="60" r="2.6"/><circle cx="169.3" cy="140" r="2.6"/><circle cx="100" cy="180" r="2.6"/><circle cx="30.7" cy="140" r="2.6"/><circle cx="30.7" cy="60" r="2.6"/></g></svg></div>` + `<div class="intro__tilt" id="introTilt">` + CONFIG.portraits.map((p, i) => { const src = p.src || p; return `<img src="${src}" alt="${CONFIG.bigTitle}"${p.pos ? ` style="object-position:${p.pos}"` : ""}${i ? ' aria-hidden="true"' : ' class="is-on"'}>`; }).join("") + `<div class="intro__glare"></div><div class="intro__back" aria-hidden="true"><div class="intro__backin"><span class="intro__mono">DK</span><span class="intro__qm">“</span><em>Was ich an Fotos mag: Sie halten einen Moment fest, der für immer vorbei ist und sich nie wiederholen lässt.</em><i>— Karl Lagerfeld</i><small>↻ zum Umdrehen tippen</small></div></div></div>`;
   const imgs = [...photoEl.querySelectorAll("img")];   // nur die Fotos (nicht der Ring dahinter)
   let pi = 0;
   if (imgs.length > 1) setInterval(() => {
