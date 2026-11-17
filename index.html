@@ -980,7 +980,7 @@ function createGallery(cfg, ci, sec){
     const chord = 2 * R * Math.sin(PW / (2 * R));
     const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     let d = w < 640
-      ? Math.max(PWP / (0.8 * 2 * tanH * camera.aspect), (PH * 1.25) / (2 * tanH))   // Handy: Hochformat-Bild = 80 % der Bildschirmbreite, Querformate ragen über den Rand
+      ? Math.max(PWP / (0.72 * 2 * tanH * camera.aspect), (PH * 1.25) / (2 * tanH))   // Handy: Hochformat-Bild = 72 % der Bildschirmbreite, Querformate ragen über den Rand
       : Math.max(chord / fill / (2 * tanH * camera.aspect), (PH * (isHero ? 2.6 : 1.6)) / (2 * tanH));   // Bild muss in die Höhe passen (oben mit Platz für den Namen)
     let camY = isHero ? 0.35 : 0;   // oben: Streifen etwas unter die Mitte, Platz für den Namen darüber
     const head = sec.querySelector(".clients--inline");
