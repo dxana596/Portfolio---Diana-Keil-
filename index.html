@@ -1016,7 +1016,7 @@ function createGallery(cfg, ci, sec){
     const w = sec.clientWidth, h = sec.clientHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    const fill = w < 640 ? 0.78 : (CAROUSEL ? 0.46 : 0.6);   // im Karussell etwas kleiner, damit die Nachbarn zu sehen sind               // Anteil der Breite für das Frontbild
+    const fill = w < 640 ? 0.78 : (CAROUSEL ? 0.56 : 0.6);   // im Karussell etwas kleiner, damit die Nachbarn zu sehen sind               // Anteil der Breite für das Frontbild
     const chord = 2 * R * Math.sin(PW / (2 * R));
     const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     let d = w < 640
