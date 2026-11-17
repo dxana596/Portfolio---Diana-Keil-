@@ -536,7 +536,6 @@
     </div>
   </div>
   <nav class="topnav" aria-label="Seiten">
-    <a href="#kontakt">Kontakt</a>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Hell/Dunkel umschalten">
       <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
       <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
@@ -811,8 +810,12 @@ function tiltPhoto(box, el){
   const hero = document.getElementById("hero");
   hero.addEventListener("pointermove", e => {
     if (e.pointerType !== "mouse") return;
-    const r = box.getBoundingClientRect();
-    set((e.clientX - (r.left + r.width / 2)) / (r.width * 0.6), (e.clientY - (r.top + r.height / 2)) / (r.height * 0.5));
+    // nur innerhalb des goldenen Kreises kippen – außerhalb steht das Foto wieder gerade
+    const ring = box.querySelector(".intro__ring"), rr = (ring || box).getBoundingClientRect();
+    const mx = rr.left + rr.width / 2, my = rr.top + rr.height / 2, rad = Math.max(rr.width, rr.height) / 2;
+    const dx = e.clientX - mx, dy = e.clientY - my;
+    if (Math.hypot(dx, dy) > rad) { set(0, 0); return; }
+    set(dx / rad * 1.2, dy / rad * 1.2);
   });
   hero.addEventListener("pointerleave", () => set(0, 0));
   // Handy: Neigung des Telefons (iPhone fragt beim ersten Antippen einmal um Erlaubnis)
