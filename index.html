@@ -931,7 +931,7 @@ function createGallery(cfg, ci, sec){
       v.crossOrigin = "anonymous";
       v.muted = true; v.loop = true; v.playsInline = true; v.autoplay = true; v.preload = "auto";
       v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("webkit-playsinline", "");
-      v.style.cssText = "position:fixed;left:0;top:0;width:2px;height:2px;opacity:0;pointer-events:none;z-index:-1";
+      v.style.cssText = "position:fixed;left:0;top:0;width:180px;height:320px;opacity:.01;pointer-events:none;z-index:-1";   // nicht winzig/ganz durchsichtig – sonst liefert das iPhone keine neuen Bilder
       v.src = m.src;
       document.body.appendChild(v);
       // 3) erst wenn das Video wirklich läuft, vom Standbild aufs Video umschalten
@@ -951,11 +951,16 @@ function createGallery(cfg, ci, sec){
         m.tex.generateMipmaps = false; m.tex.minFilter = THREE.LinearFilter;
         applyMedia(m, cv.width, cv.height);
         m.uniforms.forEach(u => (u.uDecode.value = 0));   // Zeichenfläche ist wie ein Foto kodiert
-        const draw = () => {
-          if (!v.paused && v.readyState >= 2) { cx.drawImage(v, 0, 0, cv.width, cv.height); m.tex.needsUpdate = true; }
-          if (v.requestVideoFrameCallback) v.requestVideoFrameCallback(draw); else requestAnimationFrame(draw);
+        // laufend nachzeichnen (ca. 30 Bilder pro Sekunde reichen), nur wenn das Video läuft und die Galerie sichtbar ist
+        let lastT = -1, lastDraw = 0;
+        const draw = now => {
+          requestAnimationFrame(draw);
+          if (v.paused || v.readyState < 2 || !g.visible || now - lastDraw < 30) return;
+          if (v.currentTime === lastT) return;
+          lastT = v.currentTime; lastDraw = now;
+          cx.drawImage(v, 0, 0, cv.width, cv.height); m.tex.needsUpdate = true;
         };
-        draw();
+        requestAnimationFrame(draw);
       });
       m.el = v;
     }
