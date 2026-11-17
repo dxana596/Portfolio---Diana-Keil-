@@ -16,6 +16,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link href="fonts/fonts.css" rel="stylesheet">
+<script>try{if(localStorage.getItem("theme")==="light")document.documentElement.dataset.theme="light"}catch(e){}</script>
 <style>
   :root{
     --bg:#f0ebe2; --fg:#131720; --muted:#7a7468;
@@ -342,24 +343,24 @@
   .fab:hover{background:#1a1f2c;border-color:var(--gold-hi)}
   .fab svg{width:17px;height:17px;color:var(--gold-hi);flex:none}
 
-  /* =========== Kino-Look: dunkle Seite mit goldenen Akzenten =========== */
-  :root{--bg:#3a2a22;--fg:#f6efe6;--muted:#ddcfc2;--gold:#d8b46c;--gold-hi:#e8c987;--gold-lo:#ecd29e}
-  .marquee__text{color:var(--fg)}
-  .intro__lead{color:#cfc8bc}
-  .marquee__track img{filter:brightness(0) invert(1);opacity:.55}
-  .intro__photo{background:none}
-  .scrollcue__line{background:rgba(255,255,255,.18)}
-  .about{background:rgba(58,42,34,.92)}
-  .about li a,.about li button,.about__close{background:var(--gold);color:var(--night)}
-  .pill{background:var(--gold);color:var(--night)}
-  .svc2,.svc2__card{border-color:rgba(255,255,255,.12)}
-  .svc2__toggle{border-color:rgba(255,255,255,.25)}
-  .svc2__card.is-open .svc2__toggle{background:var(--gold);color:var(--night);border-color:var(--gold)}
-  .svc2__tags li{border-color:rgba(255,255,255,.18);color:#d8d2c8}
-  .testi__card{--fg:#131720;--muted:#7a7468;color:#131720;box-shadow:0 24px 50px -24px rgba(0,0,0,.8)}
-  .testi__name{color:#9a7a3d}
-  .contact{background:#2b1f19}
-  .fab{background:#4e3b31}
+  /* =========== Dunkler Modus (Espresso) – gilt, solange nicht „hell“ gewählt ist =========== */
+  :root:not([data-theme="light"]){--bg:#3a2a22;--fg:#f6efe6;--muted:#ddcfc2;--gold:#d8b46c;--gold-hi:#e8c987;--gold-lo:#ecd29e}
+  html:not([data-theme="light"]) .marquee__text{color:var(--fg)}
+  html:not([data-theme="light"]) .intro__lead{color:#cfc8bc}
+  html:not([data-theme="light"]) .marquee__track img{filter:brightness(0) invert(1);opacity:.55}
+  html:not([data-theme="light"]) .intro__photo{background:none}
+  html:not([data-theme="light"]) .scrollcue__line{background:rgba(255,255,255,.18)}
+  html:not([data-theme="light"]) .about{background:rgba(58,42,34,.92)}
+  html:not([data-theme="light"]) .about li a,html:not([data-theme="light"]) .about li button,html:not([data-theme="light"]) .about__close{background:var(--gold);color:var(--night)}
+  html:not([data-theme="light"]) .pill{background:var(--gold);color:var(--night)}
+  html:not([data-theme="light"]) .svc2,html:not([data-theme="light"]) .svc2__card{border-color:rgba(255,255,255,.12)}
+  html:not([data-theme="light"]) .svc2__toggle{border-color:rgba(255,255,255,.25)}
+  html:not([data-theme="light"]) .svc2__card.is-open .svc2__toggle{background:var(--gold);color:var(--night);border-color:var(--gold)}
+  html:not([data-theme="light"]) .svc2__tags li{border-color:rgba(255,255,255,.18);color:#d8d2c8}
+  html:not([data-theme="light"]) .testi__card{--fg:#131720;--muted:#7a7468;color:#131720;box-shadow:0 24px 50px -24px rgba(0,0,0,.8)}
+  html:not([data-theme="light"]) .testi__name{color:#9a7a3d}
+  html:not([data-theme="light"]) .contact{background:#2b1f19}
+  html:not([data-theme="light"]) .fab{background:#4e3b31}
   /* Farbschein hinter jeder Galerie: weiches Licht in den Farben des Bildes in der Mitte */
   .glow{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 1.2s ease;
     background:radial-gradient(ellipse 75% 62% at 50% var(--cy,50%),rgb(212 168 98 / .5),rgb(212 168 98 / .18) 50%,transparent 80%);filter:blur(40px)}
@@ -373,6 +374,7 @@
   .leaks i:nth-child(3){width:30vmax;height:60vmax;right:-14vmax;top:-10vmax;background:radial-gradient(closest-side,rgba(255,96,64,.38),transparent);animation-duration:37s;animation-delay:-17s}
   @keyframes leak{0%,100%{opacity:.18;transform:translate(0,0) scale(1)}35%{opacity:.62;transform:translate(6vmax,4vmax) scale(1.12)}60%{opacity:.3;transform:translate(-3vmax,7vmax) scale(.95)}}
   @media (prefers-reduced-motion:reduce){.leaks i{animation:none;opacity:.3}}
+  html[data-theme="light"] .leaks{display:none}
   /* 3D-Kippen des Startfotos */
   .intro__tilt{position:absolute;inset:0;will-change:transform;border-radius:4px;box-shadow:0 30px 60px -30px rgba(0,0,0,.55)}
   .intro__glare{position:absolute;inset:0;border-radius:4px;pointer-events:none;opacity:calc(var(--ga,0) * .35);
@@ -392,6 +394,15 @@
   .intro__back em{font-family:var(--serif);font-style:italic;font-weight:500;font-size:clamp(15px,1.2vw,19px);line-height:1.4;color:#2a251f;max-width:22ch}
   .intro__qm{font-family:var(--serif);font-size:64px;line-height:.4;height:22px;color:#c49a52}
   .intro__back small{margin-top:18px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#9a8f82}
+  /* Hell/Dunkel-Knopf oben rechts */
+  .topnav{align-items:center}
+  .theme-btn{display:inline-flex;align-items:center;gap:7px;padding:6px 12px 6px 9px;border-radius:999px;border:1px solid rgba(196,154,82,.55);background:transparent;color:inherit;font:inherit;font-size:12px;letter-spacing:.04em;cursor:pointer;transition:background .25s,border-color .25s}
+  .theme-btn:hover{border-color:var(--gold-hi);background:rgba(196,154,82,.12)}
+  .theme-btn svg{width:15px;height:15px;color:var(--gold)}
+  .theme-btn .ic-moon{display:none}
+  html[data-theme="light"] .theme-btn .ic-sun{display:none}
+  html[data-theme="light"] .theme-btn .ic-moon{display:block}
+  html.theme-anim,html.theme-anim *{transition:background-color .5s ease,color .5s ease,border-color .5s ease !important}
 </style>
 <script>
   // Seite startet immer ganz oben – auch beim Neuladen und wenn ein #Anker in der Adresse steht
@@ -526,6 +537,11 @@
   </div>
   <nav class="topnav" aria-label="Seiten">
     <a href="#kontakt">Kontakt</a>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Hell/Dunkel umschalten">
+      <svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg>
+      <svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+      <span class="theme-btn__txt">Hell</span>
+    </button>
   </nav>
   <a class="scrollcue" href="#kontakt"><span class="scrollcue__line"></span>Kontakt</a>
 </section>
@@ -1511,5 +1527,20 @@ tick();
 })();
 </script>
 <div class="leaks" aria-hidden="true"><i></i><i></i><i></i></div>
+<script>
+// Hell/Dunkel umschalten (Wahl wird im Browser gemerkt)
+(function(){
+  const btn = document.getElementById("themeBtn"), txt = btn.querySelector(".theme-btn__txt"), root = document.documentElement;
+  const sync = () => { const light = root.dataset.theme === "light"; txt.textContent = light ? "Dunkel" : "Hell"; btn.setAttribute("aria-pressed", light); };
+  sync();
+  btn.addEventListener("click", () => {
+    root.classList.add("theme-anim");
+    if (root.dataset.theme === "light") delete root.dataset.theme; else root.dataset.theme = "light";
+    try { localStorage.setItem("theme", root.dataset.theme || "dark"); } catch (e) {}
+    sync();
+    setTimeout(() => root.classList.remove("theme-anim"), 600);
+  });
+})();
+</script>
 </body>
 </html>
