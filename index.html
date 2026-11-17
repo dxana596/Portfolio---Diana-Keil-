@@ -237,7 +237,7 @@
   .contact .eyebrow{color:var(--gold)}
   .contact .h2{margin:20px 0 32px;font-size:clamp(26px,3vw,46px);line-height:1}
   .contact__mail{display:inline-block;font-family:var(--serif);font-size:clamp(18px,1.9vw,28px);text-decoration:none;border-bottom:1px solid rgba(196,154,82,.55);padding-bottom:4px;transition:border-color .3s}
-  .contact__cta{display:inline-flex;align-items:center;gap:12px;margin:6px 0 30px;padding:17px 34px;border-radius:999px;background:linear-gradient(135deg,#d4b06a,#c49a52 50%,#9a7a3d);color:var(--night);font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;box-shadow:0 16px 36px -16px rgba(212,176,106,.6);transition:transform .3s,box-shadow .3s}
+  .contact__cta{display:inline-flex;align-items:center;gap:12px;margin:6px 0 4px;padding:17px 34px;border-radius:999px;background:linear-gradient(135deg,#d4b06a,#c49a52 50%,#9a7a3d);color:var(--night);font-size:14px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;box-shadow:0 16px 36px -16px rgba(212,176,106,.6);transition:transform .3s,box-shadow .3s}
   .contact__cta span{transition:transform .3s}
   .contact__cta:hover{transform:translateY(-2px);box-shadow:0 22px 44px -16px rgba(212,176,106,.75)}
   .contact__cta:hover span{transform:translateX(4px)}
@@ -513,8 +513,6 @@
     <div class="eyebrow reveal">(Kontakt)</div>
     <h2 class="h2 reveal">Lern mich und<br>meine Arbeit kennen.</h2>
     <div class="reveal"><a class="contact__cta" id="contactCta" href="mailto:diana.keil09@gmail.com">Anfrage stellen <span aria-hidden="true">→</span></a></div>
-    <div class="contact__or reveal">oder direkt an</div>
-    <a class="contact__mail reveal" id="contactMail" href="mailto:diana.keil09@gmail.com">diana.keil09@gmail.com</a>
     <div class="contact__social reveal">
       <a href="https://www.instagram.com/diana.keil_/" target="_blank" rel="noopener">Instagram</a>
     </div>
@@ -689,8 +687,6 @@ document.getElementById("aboutLink").textContent = CONFIG.name;
 document.getElementById("aboutName").textContent = CONFIG.name;
 document.getElementById("footName").textContent = CONFIG.name;
 document.getElementById("year").textContent = new Date().getFullYear();
-const contactMail = document.getElementById("contactMail");
-contactMail.textContent = CONFIG.email; contactMail.href = "mailto:" + CONFIG.email;
 // "Anfrage stellen": öffnet eine E-Mail mit Betreff und kleiner Vorlage
 document.getElementById("contactCta").href = "mailto:" + CONFIG.email
   + "?subject=" + encodeURIComponent("Anfrage über dein Portfolio")
