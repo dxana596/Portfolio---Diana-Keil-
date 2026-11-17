@@ -375,6 +375,8 @@
   @keyframes leak{0%,100%{opacity:.18;transform:translate(0,0) scale(1)}35%{opacity:.62;transform:translate(6vmax,4vmax) scale(1.12)}60%{opacity:.3;transform:translate(-3vmax,7vmax) scale(.95)}}
   @media (prefers-reduced-motion:reduce){.leaks i{animation:none;opacity:.3}}
   html[data-theme="light"] .leaks{display:none}
+  /* Heller Modus: helles Braun statt Beige */
+  :root[data-theme="light"]{--bg:#c6ab8f;--muted:#5a4a3c;--gold-lo:#7a5a26}
   /* 3D-Kippen des Startfotos */
   .intro__tilt{position:absolute;inset:0;will-change:transform;border-radius:4px;box-shadow:0 30px 60px -30px rgba(0,0,0,.55)}
   .intro__glare{position:absolute;inset:0;border-radius:4px;pointer-events:none;opacity:calc(var(--ga,0) * .35);
