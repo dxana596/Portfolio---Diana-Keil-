@@ -341,37 +341,6 @@
   .fab.is-on{opacity:1;visibility:visible;transform:none}
   .fab:hover{background:#1a1f2c;border-color:var(--gold-hi)}
   .fab svg{width:17px;height:17px;color:var(--gold-hi);flex:none}
-  /* ---------- Showreel: zwei schräge Filmstreifen mit laufenden Videos ---------- */
-  .reel{position:relative;z-index:5;height:100vh;height:100lvh;min-height:520px;overflow:hidden;scroll-snap-align:start;scroll-snap-stop:always}
-  .reel__head{position:absolute;left:4vw;top:clamp(70px,13vh,130px);z-index:4}
-  .reel__title{font-family:var(--serif);font-weight:400;font-size:clamp(46px,7vw,120px);line-height:.85;letter-spacing:-.01em;margin-top:10px}
-  .reel__title em{font-style:italic;color:var(--gold)}
-  .reel__note{margin-top:16px;font-size:13px;line-height:1.5;color:var(--muted)}
-  .reel__tc{position:absolute;right:4vw;top:clamp(76px,14vh,136px);z-index:4;font:600 12px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.1em;color:var(--fg);display:flex;align-items:center;gap:8px}
-  .reel__tc::before{content:"";width:8px;height:8px;border-radius:50%;background:#d23b2e;animation:recblink 1.2s steps(2) infinite}
-  @keyframes recblink{50%{opacity:0}}
-  .fs{--fh:clamp(150px,25vh,260px);position:absolute;left:-15vw;width:130vw;z-index:2;background:#14161c;padding:30px 0;box-shadow:0 30px 60px -30px rgba(9,11,18,.6)}
-  .fs--a{top:34%;transform:rotate(-7deg)}
-  .fs--b{top:52%;transform:rotate(4deg);z-index:3}
-  .fs__track{display:flex;width:max-content;animation:fsrun 70s linear infinite}
-  .fs--b .fs__track{animation-direction:reverse;animation-duration:85s}
-  @keyframes fsrun{to{transform:translateX(-50%)}}
-  .fs__f{position:relative;flex:none;height:var(--fh);aspect-ratio:3/4;margin-right:14px;background:#000}
-  .fs__f img,.fs__f video{width:100%;height:100%;object-fit:cover;display:block}
-  .fs__f::before,.fs__f::after{content:"";position:absolute;left:-7px;right:-7px;height:10px;
-    background:repeating-linear-gradient(90deg,transparent 0 6px,#efe8dc 6px 15px,transparent 15px 22px)}
-  .fs__f::before{top:-22px}.fs__f::after{bottom:-22px}
-  .fs__n{position:absolute;left:2px;bottom:-30px;font:600 9px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.14em;color:var(--gold);white-space:nowrap;opacity:.85}
-  .fs__n::before{content:"▸ "}
-  .fs__play{position:absolute;right:8px;top:8px;font:600 9px/1 ui-monospace,Menlo,monospace;letter-spacing:.12em;color:#fff;background:rgba(210,59,46,.9);padding:4px 6px;border-radius:2px}
-  @media (max-width:760px){
-    .fs{--fh:clamp(120px,20vh,190px);left:-30vw;width:160vw}
-    .fs--a{top:33%;transform:rotate(-9deg)}
-    .fs--b{top:55%;transform:rotate(6deg)}
-    .reel__tc{top:auto;bottom:clamp(40px,9vh,90px);left:4vw;right:auto}
-    .reel__note{font-size:12px}
-  }
-  @media (prefers-reduced-motion:reduce){.fs__track{animation:none}}
 </style>
 <script>
   // Seite startet immer ganz oben – auch beim Neuladen und wenn ein #Anker in der Adresse steht
@@ -508,18 +477,6 @@
     <a href="#kontakt">Kontakt</a>
   </nav>
   <a class="scrollcue" href="#kontakt"><span class="scrollcue__line"></span>Kontakt</a>
-</section>
-
-<!-- ===================== SHOWREEL (Filmstreifen) ===================== -->
-<section class="reel" id="showreel" aria-label="Showreel">
-  <div class="reel__head reveal">
-    <div class="eyebrow">(Showreel)</div>
-    <h2 class="reel__title">Foto &amp; <em>Film</em></h2>
-    <p class="reel__note">Hochzeiten, Events, Shootings und Reels –<br>ich halte fest, was sich bewegt.</p>
-  </div>
-  <div class="reel__tc" id="reelTc">REC 00:00:00:00</div>
-  <div class="fs fs--a" aria-hidden="true"><div class="fs__track" id="fsA"></div></div>
-  <div class="fs fs--b" aria-hidden="true"><div class="fs__track" id="fsB"></div></div>
 </section>
 
 <!-- Weitere Themen: jede Galerie wird automatisch aus CONFIG.galleries erzeugt -->
@@ -1422,48 +1379,6 @@ tick();
     fab.classList.toggle("is-on", seen.size === 0);
   }, { threshold: 0.25 });
   ["hero", "kontakt"].forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el); });
-})();
-</script>
-<script>
-// Showreel: Filmstreifen füllen (Videos laufen nur, wenn der Bereich zu sehen ist)
-(function(){
-  const A = ["v:1","wed-2","evt-3","v:3","por-1","mod-1","wed-5"];
-  const B = ["fn-2","v:2","evt-6","wed-8","v:4","mod-3","evt-1"];
-  // Bilder: kleine Versionen in img/strip/ (Name ohne .jpg)
-  const vids = [];
-  let n = 1;
-  function fill(el, list){
-    const html = [];
-    for (let k = 0; k < 2; k++) list.forEach(it => {
-      const lbl = String(n).padStart(2, "0") + (n % 2 ? "" : "A") + "  DIANA KEIL 400";
-      n++;
-      if (it.startsWith("v:")) {
-        const i = it.slice(2);
-        html.push(`<div class="fs__f"><video muted loop playsinline preload="none" poster="videos/reel-${i}.jpg" data-src="videos/strip/s${i}.mp4"></video><span class="fs__play">● PLAY</span><span class="fs__n">${lbl}</span></div>`);
-      } else html.push(`<div class="fs__f"><img src="img/strip/${it}.jpg" alt="" decoding="async"><span class="fs__n">${lbl}</span></div>`);
-    });
-    el.innerHTML = html.join("");
-    el.querySelectorAll("video").forEach(v => vids.push(v));
-  }
-  fill(document.getElementById("fsA"), A);
-  fill(document.getElementById("fsB"), B);
-  const sec = document.getElementById("showreel"), tc = document.getElementById("reelTc");
-  let on = false, t0 = 0;
-  new IntersectionObserver(es => es.forEach(e => {
-    on = e.isIntersecting;
-    vids.forEach(v => {
-      if (on) { if (!v.src) v.src = v.dataset.src; v.play().catch(() => {}); }
-      else v.pause();
-    });
-    if (on) { t0 = performance.now(); requestAnimationFrame(tick); }
-  }), { threshold: 0.15 }).observe(sec);
-  // laufender Timecode wie bei einer Kamera
-  function tick(now){
-    if (!on) return;
-    const f = Math.max(0, Math.floor((now - t0) / 40)), p = x => String(x).padStart(2, "0");
-    tc.textContent = "REC 00:" + p(Math.floor(f / 1500) % 60) + ":" + p(Math.floor(f / 25) % 60) + ":" + p(f % 25);
-    requestAnimationFrame(tick);
-  }
 })();
 </script>
 </body>
