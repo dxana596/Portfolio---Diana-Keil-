@@ -756,7 +756,7 @@ const sections = CONFIG.galleries.map(cfg => {
   const sec = document.createElement("section");
   sec.className = "theme"; sec.id = cfg.id || slug(cfg.name);
   sec.setAttribute("aria-label", cfg.name);
-  sec.innerHTML = `<div class="theme__stage"><div class="glow"></div><canvas class="gl"></canvas><div class="cat"></div><div class="gal-count"></div><div class="vf" aria-hidden="true"><i></i><i></i><i></i><i></i><b>REC</b></div>${cfg.link ? `<a class="theme__link" href="${cfg.link.url}" target="_blank" rel="noopener">${cfg.link.label} ↗</a>` : ""}</div>`;
+  sec.innerHTML = `<div class="theme__stage"><div class="glow"></div><canvas class="gl"></canvas><div class="cat"></div><div class="gal-count"></div>${cfg.link ? `<a class="theme__link" href="${cfg.link.url}" target="_blank" rel="noopener">${cfg.link.label} ↗</a>` : ""}</div>`;
   themesEl.appendChild(sec);
   return sec;
 });
