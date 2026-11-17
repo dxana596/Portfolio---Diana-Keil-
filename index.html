@@ -737,10 +737,12 @@ const PHONE_MQ = matchMedia("(max-width:639px)");
 PHONE_MQ.addEventListener("change", () => location.reload());
 const PW = PHONE_MQ.matches ? PH : PH * 16 / 9, PWP = PH * 9 / 16;   // Breite Querformat bzw. Hochformat 9:16
 const R = PW * 0.8;                          // Zylinderradius (kleiner = stärker gekrümmt)
+const CAROUSEL = true;                       // Galerien als 3D-Karussell (false = flacher Streifen wie früher)
+const RC = (PW + GAP) / 0.78;                // Radius der Drehbühne (kleiner = Bilder stärker weggedreht)
 const MIN_L = 34;                            // Mindestlänge, damit der Streifen auch auf breiten Bildschirmen immer gefüllt ist
 
 const vert = /* glsl */`
-  uniform float uOffset, uR, uBend, uMirror, uH, uGap, uVel, uTime, uShiftX, uScale;
+  uniform float uOffset, uR, uBend, uMirror, uH, uGap, uVel, uTime, uShiftX, uScale, uCar, uRc;
   varying vec2 vUv; varying float vY; varying float vFacing; varying float vA;
   void main(){
     vUv = uv;
@@ -754,6 +756,14 @@ const vert = /* glsl */`
     float a = s / uR;
     vec3 cylP = vec3(uR * sin(a), y, uR * cos(a) - uR);
     vec3 pos = mix(flatP, cylP, uBend);
+    if (uCar > 0.5) {
+      // 3D-Karussell: jedes Bild steht als Ganzes auf einer Drehbühne, seitliche Bilder sind kleiner und weggedreht
+      float ac = clamp(uOffset / uRc, -1.7, 1.7);
+      float sc = mix(1.0, 0.74, smoothstep(0.0, 1.0, abs(ac)));
+      vec3 ctr = vec3(uRc * sin(ac), 0.0, uRc * cos(ac) - uRc);
+      pos = ctr + vec3(cos(ac) * p.x * sc, y * sc, -sin(ac) * p.x * sc);
+      a = uOffset / uRc;
+    }
     pos.xy *= uScale;
     pos.x += uShiftX;
     vY = p.y / uH + 0.5;
@@ -764,14 +774,15 @@ const vert = /* glsl */`
 const frag = /* glsl */`
   uniform sampler2D uTex; uniform vec2 uCover; uniform vec3 uTint;
   uniform sampler2D uBadge; uniform vec4 uBadgeRect; uniform float uHasBadge;
-  uniform float uAlpha, uMirror, uTime, uLoaded, uVel, uBend, uDecode;
+  uniform float uAlpha, uMirror, uTime, uLoaded, uVel, uBend, uDecode, uCar;
   varying vec2 vUv; varying float vY; varying float vFacing; varying float vA;
   void main(){
     vec2 uv = vUv;
     if (uMirror > 0.5) uv.x += sin(vY * 60.0 + uTime * 2.0) * 0.004;   // leichte Wasserwelle nur in der Spiegelung
     uv = (uv - 0.5) * uCover + 0.5;
     // Bild neutral – keine Tönung, kein Farbfilter
-    vec3 col = texture2D(uTex, uv).rgb;
+    float side = uCar * smoothstep(0.25, 1.1, abs(vA));   // 0 = Bild vorne in der Mitte, 1 = ganz an der Seite
+    vec3 col = texture2D(uTex, uv, side * 2.6).rgb;      // seitliche Bilder leicht unscharf
     // Videos kommen (anders als Fotos) noch sRGB-kodiert an → hier in linear umrechnen
     if (uDecode > 0.5) col = mix(pow(col * 0.9478672986 + vec3(0.0521327014), vec3(2.4)), col * 0.0773993808, vec3(lessThanEqual(col, vec3(0.04045))));
     col = mix(vec3(0.93), col, uLoaded);   // hellgrau, solange das Bild lädt
@@ -783,7 +794,9 @@ const frag = /* glsl */`
         col = mix(col, b.rgb, b.a);
       }
     }
+    col = mix(col, vec3(0.871, 0.831, 0.768), side * 0.38);   // seitliche Bilder etwas blasser (Richtung Hintergrund)
     float a = uAlpha * mix(1.0, 1.0 - smoothstep(2.3, 2.9, abs(vA)), uBend);
+    if (uCar > 0.5) a = uAlpha * (1.0 - smoothstep(1.1, 1.45, abs(vA)));
     if (a < 0.003) discard;
     if (uMirror > 0.5) a *= smoothstep(0.75, 0.0, vY) * 0.42;
     gl_FragColor = vec4(col, a);
@@ -812,6 +825,7 @@ function makeSlot(scene, m, base){
     uOffset: { value: 0 }, uR: { value: R }, uBend: { value: 1 }, uH: { value: PH }, uGap: { value: 0.1 },
     uAlpha: { value: 0 }, uTime: { value: 0 }, uLoaded: { value: 0 }, uVel: { value: 0 },
     uShiftX: { value: 0 }, uScale: { value: 1 }, uDecode: { value: 0 },
+    uCar: { value: CAROUSEL ? 1 : 0 }, uRc: { value: RC },
     uBadge: { value: null }, uBadgeRect: { value: new THREE.Vector4() }, uHasBadge: { value: 0 },
   };
   [false].forEach(mirror => {   // nur das Bild selbst – keine Spiegelung darunter
@@ -1002,7 +1016,7 @@ function createGallery(cfg, ci, sec){
     const w = sec.clientWidth, h = sec.clientHeight;
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
-    const fill = w < 640 ? 0.78 : 0.6;               // Anteil der Breite für das Frontbild
+    const fill = w < 640 ? 0.78 : (CAROUSEL ? 0.46 : 0.6);   // im Karussell etwas kleiner, damit die Nachbarn zu sehen sind               // Anteil der Breite für das Frontbild
     const chord = 2 * R * Math.sin(PW / (2 * R));
     const tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
     let d = w < 640
@@ -1064,9 +1078,25 @@ function createGallery(cfg, ci, sec){
   };
   // Welches Bild liegt unter dem Mauszeiger? (Strahl gegen Zylinder bzw. Ebene)
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  const pv = new THREE.Vector3();
   g.pick = (cx, cy) => {
     const r = canvas.getBoundingClientRect();
     ndc.set((cx - r.left) / r.width * 2 - 1, -((cy - r.top) / r.height) * 2 + 1);
+    if (CAROUSEL) {   // Ecken jedes Bildes auf den Bildschirm rechnen und prüfen, ob der Zeiger darin liegt (vorderstes gewinnt)
+      let hit = null, best = Infinity;
+      slots.forEach(sl => {
+        const a = wrapL(sl.base + g.scroll, L) / RC;
+        if (Math.abs(a) > 1.1 || Math.abs(a) >= best) return;
+        const sc = 1 - 0.26 * THREE.MathUtils.smoothstep(Math.abs(a), 0, 1), hw = sl.m.w / 2 * sc, hh = PH / 2 * sc;
+        let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+        [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sy]) => {
+          pv.set(RC * Math.sin(a) + Math.cos(a) * sx * hw, sy * hh, RC * Math.cos(a) - RC - Math.sin(a) * sx * hw).project(camera);
+          x0 = Math.min(x0, pv.x); x1 = Math.max(x1, pv.x); y0 = Math.min(y0, pv.y); y1 = Math.max(y1, pv.y);
+        });
+        if (ndc.x >= x0 && ndc.x <= x1 && ndc.y >= y0 && ndc.y <= y1) { hit = sl; best = Math.abs(a); }
+      });
+      return hit;
+    }
     raycaster.setFromCamera(ndc, camera);
     const o = raycaster.ray.origin, d = raycaster.ray.direction;
     let s, y;
@@ -1105,7 +1135,15 @@ function createGallery(cfg, ci, sec){
   canvas.addEventListener("pointercancel", () => (g.dragging = false));
 
   g.update = (dt, t, k, reduce) => {
-    if (started && !g.dragging && !lbOpen && !reduce && performance.now() > g.holdUntil) g.target += g.autoDir * CONFIG.autoSpeed * dt;
+    const now = performance.now();
+    if (CAROUSEL) {
+      // Drehbühne: immer auf ein Bild in der Mitte einrasten, alle paar Sekunden ein Bild weiterdrehen
+      if (!g.dragging && now > g.holdUntil) {
+        if (started && !lbOpen && !reduce && g.visible && now > (g.nextAt || 0)) { g.step(-g.autoDir); g.holdUntil = 0; g.nextAt = now + 3400; }
+        else { const j = g.nearestSlot(g.target); g.target -= wrapL(slots[j].base + g.target, L) * k(6); }
+      }
+      if (g.dragging || now < g.holdUntil) g.nextAt = Math.max(g.nextAt || 0, now + 3400);
+    } else if (started && !g.dragging && !lbOpen && !reduce && now > g.holdUntil) g.target += g.autoDir * CONFIG.autoSpeed * dt;
     g.alpha += (g.alphaTarget - g.alpha) * k(3.1);
     g.scroll += (g.target - g.scroll) * k(4.7);
     g.vel += (((g.scroll - g.last) / Math.max(dt, 1e-4)) / 60 - g.vel) * k(13); g.last = g.scroll;
