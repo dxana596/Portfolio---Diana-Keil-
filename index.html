@@ -756,12 +756,12 @@ if (CONFIG.portraits.length) {
 // 3D-Kippen: Foto neigt sich zur Maus (am Handy: beim Neigen des Telefons), ein Glanz wandert mit
 function tiltPhoto(box, el){
   if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
-  const MAX = 11;   // stärkste Neigung in Grad
+  const MAX = 22;   // stärkste Neigung in Grad
   let tx = 0, ty = 0, cx = 0, cy = 0, running = false;
   const set = (x, y) => { tx = Math.max(-1, Math.min(1, x)); ty = Math.max(-1, Math.min(1, y)); if (!running) { running = true; requestAnimationFrame(loop); } };
   function loop(){
     cx += (tx - cx) * 0.09; cy += (ty - cy) * 0.09;
-    el.style.transform = `perspective(1000px) rotateY(${cx * MAX}deg) rotateX(${-cy * MAX}deg) scale(${1 + (Math.abs(cx) + Math.abs(cy)) * 0.012})`;
+    el.style.transform = `perspective(1000px) rotateY(${cx * MAX}deg) rotateX(${-cy * MAX}deg) scale(${1 + (Math.abs(cx) + Math.abs(cy)) * 0.025})`;
     el.style.setProperty("--gx", (50 + cx * 55) + "%"); el.style.setProperty("--gy", (50 + cy * 55) + "%");
     el.style.setProperty("--ga", Math.min(1, Math.hypot(cx, cy) * 1.4).toFixed(3));
     if (Math.abs(tx - cx) + Math.abs(ty - cy) > 0.002) requestAnimationFrame(loop); else running = false;
@@ -770,7 +770,7 @@ function tiltPhoto(box, el){
   hero.addEventListener("pointermove", e => {
     if (e.pointerType !== "mouse") return;
     const r = box.getBoundingClientRect();
-    set((e.clientX - (r.left + r.width / 2)) / (r.width * 0.9), (e.clientY - (r.top + r.height / 2)) / (r.height * 0.7));
+    set((e.clientX - (r.left + r.width / 2)) / (r.width * 0.6), (e.clientY - (r.top + r.height / 2)) / (r.height * 0.5));
   });
   hero.addEventListener("pointerleave", () => set(0, 0));
   // Handy: Neigung des Telefons (iPhone fragt beim ersten Antippen einmal um Erlaubnis)
@@ -778,7 +778,7 @@ function tiltPhoto(box, el){
   const onOri = e => {
     if (e.beta == null) return;
     if (!base) base = { b: e.beta, g: e.gamma };
-    set((e.gamma - base.g) / 20, (e.beta - base.b) / 20);
+    set((e.gamma - base.g) / 12, (e.beta - base.b) / 12);
   };
   const DOE = window.DeviceOrientationEvent;
   if (DOE && typeof DOE.requestPermission === "function") {
