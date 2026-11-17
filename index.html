@@ -4,10 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Diana Keil – Portfolio</title>
+<meta name="description" content="Fotos und Videos von Diana Keil – Hochzeiten, Events, Shootings und Social Media.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Diana Portfolio">
+<meta property="og:title" content="Diana Portfolio">
+<meta property="og:description" content="Fotos und Videos – Hochzeiten, Events, Shootings und Social Media.">
+<meta property="og:url" content="https://dxana596.github.io/Portfolio---Diana-Keil-/">
+<meta property="og:image" content="https://dxana596.github.io/Portfolio---Diana-Keil-/img/vorschau.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,500&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<link href="fonts/fonts.css" rel="stylesheet">
 <style>
   :root{
     --bg:#f0ebe2; --fg:#131720; --muted:#7a7468;
@@ -323,6 +331,11 @@
     html.cur-link .cur--ring{width:60px;height:60px;margin:-30px 0 0 -30px;background:rgba(196,154,82,.14);border-color:var(--gold-hi)}
     html.cur-down .cur--ring{width:26px;height:26px;margin:-13px 0 0 -13px}
   }
+  /* Kontakt-Knopf unten rechts (immer erreichbar, außer auf Start- und Kontaktseite) */
+  .fab{position:fixed;right:clamp(16px,3vw,32px);bottom:calc(clamp(16px,3vw,32px) + env(safe-area-inset-bottom));z-index:20;display:flex;align-items:center;gap:10px;padding:13px 20px 13px 17px;border-radius:999px;background:var(--night);color:#f1ece3;border:1px solid rgba(196,154,82,.55);font-size:13px;letter-spacing:.06em;text-decoration:none;box-shadow:0 14px 32px -14px rgba(9,11,18,.55);opacity:0;visibility:hidden;transform:translateY(14px);transition:opacity .45s,visibility .45s,transform .45s,background .25s,border-color .25s}
+  .fab.is-on{opacity:1;visibility:visible;transform:none}
+  .fab:hover{background:#1a1f2c;border-color:var(--gold-hi)}
+  .fab svg{width:17px;height:17px;color:var(--gold-hi);flex:none}
 </style>
 <script>
   // Seite startet immer ganz oben – auch beim Neuladen und wenn ein #Anker in der Adresse steht
@@ -535,7 +548,7 @@
 </section>
 
 <script type="importmap">
-{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+{ "imports": { "three": "./js/three.module.js" } }
 </script>
 <script type="module">
 import * as THREE from "three";
@@ -1348,6 +1361,18 @@ tick();
       requestAnimationFrame(loop);
     })();
   })();
+</script>
+<a class="fab" id="fab" href="#kontakt" aria-label="Kontakt aufnehmen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>Kontakt</a>
+<script>
+// Kontakt-Knopf: ausblenden, solange die Startseite oder der Kontakt-Bereich zu sehen ist
+(function(){
+  const fab = document.getElementById("fab"), seen = new Set();
+  const obs = new IntersectionObserver(es => {
+    es.forEach(e => e.isIntersecting ? seen.add(e.target.id) : seen.delete(e.target.id));
+    fab.classList.toggle("is-on", seen.size === 0);
+  }, { threshold: 0.25 });
+  ["hero", "kontakt"].forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el); });
+})();
 </script>
 </body>
 </html>
