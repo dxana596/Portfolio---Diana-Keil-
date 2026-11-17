@@ -341,6 +341,37 @@
   .fab.is-on{opacity:1;visibility:visible;transform:none}
   .fab:hover{background:#1a1f2c;border-color:var(--gold-hi)}
   .fab svg{width:17px;height:17px;color:var(--gold-hi);flex:none}
+
+  /* =========== Kino-Look: dunkle Seite mit goldenen Akzenten =========== */
+  :root{--bg:#0b0d13;--fg:#efe9df;--muted:#9c958a;--gold-lo:#b8914c}
+  .marquee__text{color:var(--fg)}
+  .intro__lead{color:#cfc8bc}
+  .marquee__track img{filter:brightness(0) invert(1);opacity:.55}
+  .intro__photo{background:#161a22}
+  .scrollcue__line{background:rgba(255,255,255,.18)}
+  .about{background:rgba(11,13,19,.82)}
+  .about li a,.about li button,.about__close{background:var(--gold);color:var(--night)}
+  .pill{background:var(--gold);color:var(--night)}
+  .svc2,.svc2__card{border-color:rgba(255,255,255,.12)}
+  .svc2__toggle{border-color:rgba(255,255,255,.25)}
+  .svc2__card.is-open .svc2__toggle{background:var(--gold);color:var(--night);border-color:var(--gold)}
+  .svc2__tags li{border-color:rgba(255,255,255,.18);color:#d8d2c8}
+  .testi__card{--fg:#131720;--muted:#7a7468;color:#131720;box-shadow:0 24px 50px -24px rgba(0,0,0,.8)}
+  .testi__name{color:#9a7a3d}
+  .contact{background:#07080c}
+  .fab{background:#151924}
+  /* Farbschein hinter jeder Galerie: weiches Licht in den Farben des Bildes in der Mitte */
+  .glow{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 1.2s ease;
+    background:radial-gradient(ellipse 75% 62% at 50% var(--cy,50%),rgb(var(--glow,120 100 80) / .7),rgb(var(--glow,120 100 80) / .25) 50%,transparent 80%);filter:blur(40px)}
+  .theme.is-lit .glow{opacity:1}
+  /* Lichtreflexe wie bei alten Filmkameras (Light Leaks) */
+  .leaks{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;mix-blend-mode:screen}
+  .leaks i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.0;animation:leak 26s ease-in-out infinite}
+  .leaks i:nth-child(1){width:55vmax;height:38vmax;left:-22vmax;top:-12vmax;background:radial-gradient(closest-side,rgba(255,138,48,.55),rgba(214,92,40,.25) 55%,transparent);animation-duration:24s}
+  .leaks i:nth-child(2){width:46vmax;height:46vmax;right:-24vmax;bottom:-20vmax;background:radial-gradient(closest-side,rgba(232,176,92,.5),rgba(196,120,60,.2) 55%,transparent);animation-duration:31s;animation-delay:-9s}
+  .leaks i:nth-child(3){width:30vmax;height:60vmax;right:-14vmax;top:-10vmax;background:radial-gradient(closest-side,rgba(255,96,64,.38),transparent);animation-duration:37s;animation-delay:-17s}
+  @keyframes leak{0%,100%{opacity:.18;transform:translate(0,0) scale(1)}35%{opacity:.62;transform:translate(6vmax,4vmax) scale(1.12)}60%{opacity:.3;transform:translate(-3vmax,7vmax) scale(.95)}}
+  @media (prefers-reduced-motion:reduce){.leaks i{animation:none;opacity:.3}}
 </style>
 <script>
   // Seite startet immer ganz oben – auch beim Neuladen und wenn ein #Anker in der Adresse steht
@@ -725,7 +756,7 @@ const sections = CONFIG.galleries.map(cfg => {
   const sec = document.createElement("section");
   sec.className = "theme"; sec.id = cfg.id || slug(cfg.name);
   sec.setAttribute("aria-label", cfg.name);
-  sec.innerHTML = `<div class="theme__stage"><canvas class="gl"></canvas><div class="cat"></div><div class="gal-count"></div><div class="vf" aria-hidden="true"><i></i><i></i><i></i><i></i><b>REC</b></div>${cfg.link ? `<a class="theme__link" href="${cfg.link.url}" target="_blank" rel="noopener">${cfg.link.label} ↗</a>` : ""}</div>`;
+  sec.innerHTML = `<div class="theme__stage"><div class="glow"></div><canvas class="gl"></canvas><div class="cat"></div><div class="gal-count"></div><div class="vf" aria-hidden="true"><i></i><i></i><i></i><i></i><b>REC</b></div>${cfg.link ? `<a class="theme__link" href="${cfg.link.url}" target="_blank" rel="noopener">${cfg.link.label} ↗</a>` : ""}</div>`;
   themesEl.appendChild(sec);
   return sec;
 });
@@ -774,7 +805,7 @@ const frag = /* glsl */`
     vec3 col = texture2D(uTex, uv).rgb;
     // Videos kommen (anders als Fotos) noch sRGB-kodiert an → hier in linear umrechnen
     if (uDecode > 0.5) col = mix(pow(col * 0.9478672986 + vec3(0.0521327014), vec3(2.4)), col * 0.0773993808, vec3(lessThanEqual(col, vec3(0.04045))));
-    col = mix(vec3(0.93), col, uLoaded);   // hellgrau, solange das Bild lädt
+    col = mix(vec3(0.012), col, uLoaded);   // dunkel, solange das Bild lädt
     // Aufrufe-Badge (unten links auf Reels)
     if (uHasBadge > 0.5 && uMirror < 0.5) {
       vec2 bq = (vUv - uBadgeRect.xy) / (uBadgeRect.zw - uBadgeRect.xy);
@@ -796,6 +827,20 @@ const loader = new THREE.TextureLoader();
 loader.setCrossOrigin("anonymous");
 const LOOK = new THREE.Vector3(...CONFIG.look);
 
+// Durchschnittsfarbe eines Bildes (für den Farbschein hinter der Galerie), etwas kräftiger gemacht
+const avgCv = document.createElement("canvas"); avgCv.width = avgCv.height = 8;
+function avgColor(img){
+  try {
+    const c = avgCv.getContext("2d", { willReadFrequently: true });
+    c.drawImage(img, 0, 0, 8, 8);
+    const d = c.getImageData(0, 0, 8, 8).data; let r = 0, g = 0, b = 0;
+    for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
+    r /= 64; g /= 64; b /= 64;
+    const m = (r + g + b) / 3, k = 1.6;   // Sättigung anheben
+    const f = x => Math.max(0, Math.min(255, m + (x - m) * k)) * 1.15;
+    return [f(r), f(g), f(b)].map(x => Math.min(255, x));
+  } catch { return null; }
+}
 const isVideo = src => /\.(mp4|webm|mov)(\?|#|$)/i.test(src);
 const isPath = src => /[\/.]/.test(src);
 function applyMedia(m, w, h){
@@ -932,7 +977,7 @@ function createGallery(cfg, ci, sec){
       const done = () => onDone && onDone();
       loader.load(m.src, tex => {
         tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
-        m.tex = tex; applyMedia(m, tex.image.width, tex.image.height); done();
+        m.tex = tex; m.avg = avgColor(tex.image); applyMedia(m, tex.image.width, tex.image.height); done();
       }, undefined, done);
     });
   };
@@ -944,7 +989,7 @@ function createGallery(cfg, ci, sec){
       loader.load(poster, tex => {
         if (m.playing) return;
         tex.colorSpace = THREE.SRGBColorSpace;
-        m.tex = tex; applyMedia(m, tex.image.width, tex.image.height);
+        m.tex = tex; m.avg = avgColor(tex.image); applyMedia(m, tex.image.width, tex.image.height);
         m.uniforms.forEach(u => (u.uDecode.value = 0));
       });
       // 2) Video: unsichtbar in die Seite hängen (iPhone spielt sonst oft nicht ab)
@@ -1117,11 +1162,20 @@ function createGallery(cfg, ci, sec){
       u.uAlpha.value = g.alpha;
     });
     if (started && g.alphaTarget) setCat(slots[g.nearestSlot(g.scroll)].m.ci);   // Thema folgt dem Bild in der Mitte
+    // Farbschein: sanft zur Farbe des Bildes in der Mitte überblenden
+    const want = slots[g.nearestSlot(g.scroll)].m.avg;
+    if (want) {
+      const gc = g.gc || (g.gc = want.slice());
+      let moved = false;
+      for (let i = 0; i < 3; i++) { const d = (want[i] - gc[i]) * k(2.2); if (Math.abs(d) > 0.05) { gc[i] += d; moved = true; } }
+      if (moved || !g.gcSet) { sec.style.setProperty("--glow", gc.map(Math.round).join(" ")); g.gcSet = true; }
+    }
     renderer.render(scene, camera);
   };
   // sichtbar werden: einblenden, Videos starten
   g.show = () => {
     g.alphaTarget = 1;
+    sec.classList.add("is-lit");
     setCat(slots[g.nearestSlot(g.scroll)].m.ci);
     if (!lbOpen) g.loadVideos();
   };
@@ -1381,5 +1435,6 @@ tick();
   ["hero", "kontakt"].forEach(id => { const el = document.getElementById(id); if (el) obs.observe(el); });
 })();
 </script>
+<div class="leaks" aria-hidden="true"><i></i><i></i><i></i></div>
 </body>
 </html>
